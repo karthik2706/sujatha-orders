@@ -1,15 +1,3 @@
-//AA Jewels
-// const firebaseConfig = {
-//   apiKey: "AIzaSyCXEYAGXm0uV9M1bDbvL4HWlBBes5eo9DU",
-//   authDomain: "aa-jewel-oms.firebaseapp.com",
-//   databaseURL:
-//     "https://aa-jewel-oms-default-rtdb.europe-west1.firebasedatabase.app",
-//   projectId: "aa-jewel-oms",
-//   storageBucket: "aa-jewel-oms.appspot.com",
-//   messagingSenderId: "986868631414",
-//   appId: "1:986868631414:web:8b0c71b9bf9a989aecdc57",
-//   measurementId: "G-S7KHKNNSNW",
-// };
 //Sujatha
 const firebaseConfig = {
   apiKey: "AIzaSyDC7WBF3_-NLb55bziNX-_ybpGxTIGOI1s",
@@ -20,6 +8,18 @@ const firebaseConfig = {
   messagingSenderId: "944519518698",
   appId: "1:944519518698:web:8c47c36c1124655c65ba93"
 };
+
+
+//Delhivery APIs
+//Stage Keys
+// var clientKeyD = '8da3f652893522c4b1176d367ced95d90305d4f4';
+// var urlD = 'https://staging-express.delhivery.com';
+// var clientName = 'ACHYUTHA0043179-B2C';
+
+//Prod Keys
+var clientKeyD = "b2c773ff4eafd8a7fa4f87b1c847837afc37aab8";
+var urlD = "https://track.delhivery.com";
+var clientName = 'SUJATHA 0052070';
 
 firebase.initializeApp(firebaseConfig);
 
@@ -41,9 +41,9 @@ function createOrder(data) {
     .database()
     .ref(`/oms/clients/${clientRef}/orders`)
     .push(data)
-    .then(function () {
-      console.log("data posted");
-      orderSumitted(data);
+    .then(function (resp) {
+      // console.log(resp);
+      orderSumitted(data, resp);
     });
 }
 
@@ -123,8 +123,8 @@ function renderProfile(data) {
     initForm();
 }
 
-function orderSumitted(data) {
-  console.log(data);
+function orderSumitted(data, resp) {
+  // console.log(data);
   var orderData = data.fields;
   const $printHtml = $("#element-to-print");
   if (orderData.vendor === "1") {
@@ -165,16 +165,87 @@ function orderSumitted(data) {
   if (!userExists) {
     createCustomer(data);
   }
-  refreshOrders();
+  
+  //Create Delhivery WayBill Number
+  if (orderData.vendor === "2") {
+    delhiveryApis('GET', '/waybill/api/fetch/json/', {
+      token: clientKeyD,
+      client_name: clientName
+    }, trackingDCallback, resp._delegate._path.pieces_);
+  } else {
+    refreshOrders();
+  }
+  //_delegate._path.pieces_
 }
 
+//manually generate waybill
+var nonTrackingOrders = [];
+function manualBulkWaybill() {
+
+  nonTrackingOrders = window.allOrders.filter(function (order) {
+    return (order.vendor == '2' && order.tracking == '');
+  });
+
+  delhiveryApis('GET', '/waybill/api/bulk/json/', {
+    token: clientKeyD,
+    cl: clientName,
+    count: nonTrackingOrders.length
+  }, bulkTrackingDCallback);
+}
+
+//update generated waybill
+function bulkTrackingDCallback(data) {
+  $(data.split(',')).each(function(i, v){
+    if(nonTrackingOrders[i]) {
+      nonTrackingOrders[i].tracking = v;
+    }
+  });
+
+  $(nonTrackingOrders).each(function(){
+      var orderId = this.key;
+      var trackValue = this.tracking;
+      var orderRef = firebase
+        .app()
+        .database()
+        .ref(`/oms/clients/${clientRef}/orders/${orderId}/fields`);
+      orderRef
+        .update({
+          tracking: trackValue,
+        });
+  });
+}
+
+//Call back after fetching waybill
+function trackingDCallback(data, OrderDetails) {
+  // console.log(data, OrderDetails);
+  var trackValue = data;
+  var orderId = OrderDetails[4];
+  //Update Tracking number for Delhivery Order
+  var orderRef = firebase
+      .app()
+      .database()
+      .ref(`/oms/clients/${clientRef}/orders/${orderId}/fields`);
+    orderRef
+      .update({
+        tracking: trackValue,
+      })
+      .then(function () {
+        refreshOrders();
+      });
+}
+
+//Click on Order tab
+$('#orders-tab').click(function(){
+  refreshOrders();
+});
+
+//Refresh Orders
 function refreshOrders() {
   $("#example").dataTable().fnDestroy();
   fetchOrders("example");
 }
 
-// window.allOrders = [];
-
+//Fetch Orders
 function fetchOrders(div) {
   firebase
     .app()
@@ -200,13 +271,11 @@ function renderOrders(div, data, isParse) {
     parseData = data;
   }
 
-  // window.allOrders = parseData;
-  
+  window.allOrders = parseData;
 
   $("#" + div).DataTable({
     data: parseData,
     createdRow: function (row, parseData, dataIndex) {
-      // console.log(parseData);
       $(row).attr({
         "data-bs-id": parseData.key,
         "data-bs-toggle": "modal",
@@ -248,6 +317,9 @@ function renderOrders(div, data, isParse) {
             case "3":
               courier = "DTDC";
               break;
+            case "4":
+              courier = "Xpressbees";
+              break;
           }
           return courier;
         },
@@ -259,34 +331,6 @@ function renderOrders(div, data, isParse) {
     ],
   });
 }
-
-// function updateBulkTracking() {
-//   // console.log(window.allOrders);
-//   var filterOrders = [];
-//   var filterOrders = window.allOrders.filter(function (order) {
-//     return order.vendor == '2';
-//   });
-
-//   var wayBillObj = {};
-  
-//   $(window.waybills).each(function(){
-//     var ref = this.Order.trim();
-//     var tracking = this.Waybill.trim();
-//     wayBillObj[ref] = tracking;
-//   });
-//   $(filterOrders).each(function(){
-//     var rowId = this.key;
-//     // this.tracking = wayBillObj[this.ref] || '';
-//     var orderRef = firebase
-//       .app()
-//       .database()
-//       .ref(`/oms/clients/${clientRef}/orders/${rowId}/fields`);
-//     orderRef
-//       .update({
-//         tracking: wayBillObj[this.ref] || ''
-//       });
-//   });
-// }
 
 function initForm() {
   console.log('init form');
@@ -378,7 +422,6 @@ $(document).ready(function () {
   $editModal.on("show.bs.modal", function (event) {
     // Button that triggered the modal
     var row = event.relatedTarget;
-
     // Extract info from data-bs-* attributes
     var data = $(row).data();
     var orderRef = firebase
@@ -388,19 +431,15 @@ $(document).ready(function () {
 
       orderRef.once("value").then((snapshot) => {
         var orderData = snapshot.val();
-        // $('#updateOrder').find(':input:visible').each(function () {
-        //   $this.val('');
-        // });
         $editModal.find("#orderId").val(data.bsId);
         $('#updateOrder').find('[name=vendor]').val(orderData.vendor).trigger('change');
-        console.log(orderData);
+        // console.log(orderData);
         
         $('#updateOrder')
           .find(":input:visible")
           .not("button")
           .each(function () {
             var $this = $(this);
-            $this.val('');
             var name = $this.attr("name");
             $this.val(orderData[name]);//.find('[name=vendor]')
             // if ($this.is("input")) {
@@ -432,12 +471,6 @@ $(document).ready(function () {
     orderRef.update(obj).then(function () {
       $(".modal").find(".btn-close").click();
       refreshOrders();
-      $(this)
-      .find(":input")
-      .not("button")
-      .each(function () {
-        $(this).val('');
-      });
     });
   });
 
@@ -447,12 +480,6 @@ $(document).ready(function () {
 
   $(".cancelUpdate").click(function () {
     $("#updateOrder")[0].reset();
-    $('#updateOrder')
-      .find(":input")
-      .not("button")
-      .each(function () {
-        $(this).val('');
-      });
   });
 
   //Calender Plugin
@@ -593,7 +620,7 @@ $(document).ready(function () {
 
       delhiveryApis(
         "GET",
-        "pin-codes/json/",
+        "/c/api/pin-codes/json/",
         {
           token: clientKeyD,
           filter_codes: pincode,
@@ -709,6 +736,8 @@ $(document).ready(function () {
                     courier = "delhivery";
                   } else if (details[0] == "3") {
                     courier = "dtdc";
+                  } else if (details[0] == "4") {
+                    courier = "xpressbees";
                   }
                   if (details[1] && details[1].trim().length) {
                     tracking = details[1];
@@ -913,7 +942,7 @@ function generateXL(type, data) {
 
     $.each(data, function (index, value) {
       xlsRows.push({
-        Waybill: "",
+        Waybill: value.tracking || "",
         ReferenceNo: value.ref || value.mobile.slice(-5),
         ConsigneeName: value.name,
         City: value.city,
@@ -981,21 +1010,10 @@ function generateXL(type, data) {
   if (typeof console !== "undefined") console.log(new Date());
 }
 
-//Delhivery APIs
-//Stage Keys
-// var clientKeyD = '8da3f652893522c4b1176d367ced95d90305d4f4';
-// var urlD = 'https://staging-express.delhivery.com/c/api/'
-
-//Prod Keys
-var clientKeyD = "24aa5cc97aaa632e448440c31b18176506267b1e";
-var urlD = "https://track.delhivery.com/c/api/";
 function delhiveryApis(method, service, data, callback, target) {
   $.ajax({
     type: method,
     url: urlD + service,
-    headers: {
-      authorization: clientKeyD,
-    },
     data: data,
     contentType: "application/json; charset=utf-8",
     crossDomain: true,
