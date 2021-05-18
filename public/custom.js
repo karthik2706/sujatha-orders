@@ -1,3 +1,15 @@
+//AA Jewels
+// const firebaseConfig = {
+//   apiKey: "AIzaSyCXEYAGXm0uV9M1bDbvL4HWlBBes5eo9DU",
+//   authDomain: "aa-jewel-oms.firebaseapp.com",
+//   databaseURL:
+//     "https://aa-jewel-oms-default-rtdb.europe-west1.firebasedatabase.app",
+//   projectId: "aa-jewel-oms",
+//   storageBucket: "aa-jewel-oms.appspot.com",
+//   messagingSenderId: "986868631414",
+//   appId: "1:986868631414:web:8b0c71b9bf9a989aecdc57",
+//   measurementId: "G-S7KHKNNSNW",
+// };
 //Sujatha
 const firebaseConfig = {
   apiKey: "AIzaSyDC7WBF3_-NLb55bziNX-_ybpGxTIGOI1s",
@@ -9,6 +21,11 @@ const firebaseConfig = {
   appId: "1:944519518698:web:8c47c36c1124655c65ba93"
 };
 
+//Sujatha Prod Keys
+var clientKeyD = "b2c773ff4eafd8a7fa4f87b1c847837afc37aab8";
+var urlD = "https://track.delhivery.com";
+var clientName = 'SUJATHA 0052070';
+
 
 //Delhivery APIs
 //Stage Keys
@@ -17,9 +34,9 @@ const firebaseConfig = {
 // var clientName = 'ACHYUTHA0043179-B2C';
 
 //Prod Keys
-var clientKeyD = "b2c773ff4eafd8a7fa4f87b1c847837afc37aab8";
+var clientKeyD = "24aa5cc97aaa632e448440c31b18176506267b1e";
 var urlD = "https://track.delhivery.com";
-var clientName = 'SUJATHA 0052070';
+var clientName = 'ACHYUTHA 0043179';
 
 firebase.initializeApp(firebaseConfig);
 
@@ -120,7 +137,7 @@ function renderProfile(data) {
       var name = $(this).attr("name");
       $(this).val(data[name]);
     });
-    initForm();
+  initForm();
 }
 
 function orderSumitted(data, resp) {
@@ -136,24 +153,24 @@ function orderSumitted(data, resp) {
     .find(".toAdd")
     .html(
       orderData.name +
-        "<br>" +
-        orderData.address.replace(/(?:\r\n|\r|\n)/g, "<br>") +
-        "<br>" +
-        orderData.city +
-        "<br> Pincode: " +
-        orderData.pincode +
-        "<br> Mobile: " +
-        orderData.mobile
+      "<br>" +
+      orderData.address.replace(/(?:\r\n|\r|\n)/g, "<br>") +
+      "<br>" +
+      orderData.city +
+      "<br> Pincode: " +
+      orderData.pincode +
+      "<br> Mobile: " +
+      orderData.mobile
     );
 
   $printHtml
     .find(".fromAdd")
     .html(
       (orderData.rname || profileData.cname) +
-        "<br>" +
-        profileData.retAddress.replace(/(?:\r\n|\r|\n)/g, "<br>") +
-        "<br> Mobile: " +
-        (orderData.rmobile || profileData.cnumber)
+      "<br>" +
+      profileData.retAddress.replace(/(?:\r\n|\r|\n)/g, "<br>") +
+      "<br> Mobile: " +
+      (orderData.rmobile || profileData.cnumber)
     );
   // console.log(orderData.rmobile, profileData.cnumber);
   $("#createOrder")[0].reset();
@@ -165,7 +182,7 @@ function orderSumitted(data, resp) {
   if (!userExists) {
     createCustomer(data);
   }
-  
+
   //Create Delhivery WayBill Number
   if (orderData.vendor === "2") {
     delhiveryApis('GET', '/waybill/api/fetch/json/', {
@@ -178,43 +195,6 @@ function orderSumitted(data, resp) {
   //_delegate._path.pieces_
 }
 
-//manually generate waybill
-var nonTrackingOrders = [];
-function manualBulkWaybill() {
-
-  nonTrackingOrders = window.allOrders.filter(function (order) {
-    return (order.vendor == '2' && order.tracking == '');
-  });
-
-  delhiveryApis('GET', '/waybill/api/bulk/json/', {
-    token: clientKeyD,
-    cl: clientName,
-    count: nonTrackingOrders.length
-  }, bulkTrackingDCallback);
-}
-
-//update generated waybill
-function bulkTrackingDCallback(data) {
-  $(data.split(',')).each(function(i, v){
-    if(nonTrackingOrders[i]) {
-      nonTrackingOrders[i].tracking = v;
-    }
-  });
-
-  $(nonTrackingOrders).each(function(){
-      var orderId = this.key;
-      var trackValue = this.tracking;
-      var orderRef = firebase
-        .app()
-        .database()
-        .ref(`/oms/clients/${clientRef}/orders/${orderId}/fields`);
-      orderRef
-        .update({
-          tracking: trackValue,
-        });
-  });
-}
-
 //Call back after fetching waybill
 function trackingDCallback(data, OrderDetails) {
   // console.log(data, OrderDetails);
@@ -222,20 +202,20 @@ function trackingDCallback(data, OrderDetails) {
   var orderId = OrderDetails[4];
   //Update Tracking number for Delhivery Order
   var orderRef = firebase
-      .app()
-      .database()
-      .ref(`/oms/clients/${clientRef}/orders/${orderId}/fields`);
-    orderRef
-      .update({
-        tracking: trackValue,
-      })
-      .then(function () {
-        refreshOrders();
-      });
+    .app()
+    .database()
+    .ref(`/oms/clients/${clientRef}/orders/${orderId}/fields`);
+  orderRef
+    .update({
+      tracking: trackValue,
+    })
+    .then(function () {
+      refreshOrders();
+    });
 }
 
 //Click on Order tab
-$('#orders-tab').click(function(){
+$('#orders-tab').click(function () {
   refreshOrders();
 });
 
@@ -247,6 +227,7 @@ function refreshOrders() {
 
 //Fetch Orders
 function fetchOrders(div) {
+  $loading.show();
   firebase
     .app()
     .database()
@@ -255,9 +236,10 @@ function fetchOrders(div) {
     .then((snapshot) => {
       ordersData = snapshot.val();
       renderOrders(div, ordersData, true);
+      $loading.hide();
     });
 }
-
+// var currentTable;
 function renderOrders(div, data, isParse) {
   let parseData;
 
@@ -271,10 +253,10 @@ function renderOrders(div, data, isParse) {
     parseData = data;
   }
 
-  window.allOrders = parseData;
-
-  $("#" + div).DataTable({
+  // currentTable =
+   $("#" + div).DataTable({
     data: parseData,
+    order: [[ 1, "desc" ]],
     createdRow: function (row, parseData, dataIndex) {
       $(row).attr({
         "data-bs-id": parseData.key,
@@ -286,8 +268,27 @@ function renderOrders(div, data, isParse) {
       if (div === "exportTable") {
         $("#exportOrders .bulkBtn").removeAttr("disabled");
       }
+
+      if(div === 'deleteOrdersTable') {
+        $('#selectAll, .checkOrder').removeAttr('disabled');
+        $('body').on('click', '#selectAll', function(){
+          var $table = $(this).closest('table');
+          var isChecked = $(this).is(':checked');
+          $table.find('tbody tr').each(function(){
+            $(this).find('td:first input')[0].checked = isChecked;
+          });
+        });
+      }
     },
     columns: [
+      {
+        title: "<input disabled id='selectAll' type='checkbox' />",
+        orderable: false,
+        style: 'os',
+        render: function () {
+          return "<input disabled name='rowOrder' class='checkOrder' type='checkbox' />"
+        }
+    },
       {
         title: "Date",
         data: "time",
@@ -337,11 +338,48 @@ function initForm() {
   $("[name=vendor]").trigger('change');
 }
 
+function customSiginin(email, password) {
+  firebase.auth().signInWithEmailAndPassword(email, password)
+  .then((userCredential) => {
+    // Signed in
+    var user = userCredential.user;
+  })
+  .catch((error) => {
+    var errorCode = error.code;
+    var errorMessage = error.message;
+  });
+}
+
+function authCheck() {
+  firebase.auth().onAuthStateChanged(function (user) {
+    if (user) {
+      // logged in do nothing
+    } else {
+      var ui = new firebaseui.auth.AuthUI(firebase.auth());
+      ui.start('#firebaseui-auth-container', {
+        signInOptions: [
+          {
+            provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+            signInMethod: firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD,
+          }
+        ],
+        signInSuccessUrl: window.location.href
+      });
+      $('#auth-modal').addClass('show');
+    }
+  });
+}
+
+var $loading;
+
 $(document).ready(function () {
+
+  authCheck();
+  $loading = $('.loading');
   fetchOrders("example");
   fetchProfile();
 
-  $("#createOrder").submit(function (event) {
+  $('body').on('submit', "#createOrder", function (event) {
     event.preventDefault();
     var fields = {};
     $(this).find("[name=time]").val(moment().format("DD-MM-YYYY"));
@@ -352,6 +390,9 @@ $(document).ready(function () {
         fields[this.name] = $(this).val();
       });
     var obj = { fields: fields };
+    if(obj.fields.ref == '') {
+      obj.fields.ref = obj.fields.mobile.slice(-5);
+    }
     createOrder(obj);
   });
 
@@ -420,39 +461,58 @@ $(document).ready(function () {
 
   var $editModal = $("#editModal");
   $editModal.on("show.bs.modal", function (event) {
-    // Button that triggered the modal
+    // event.preventDefault();
     var row = event.relatedTarget;
-    // Extract info from data-bs-* attributes
+    // if(!$(row).find('.checkOrder')) {
+    //   event.stopPropagation();
+    // }
     var data = $(row).data();
+    $loading.show();
+    var $updateOrderForm = $('#createOrder').clone(true);
+    $updateOrderForm.removeClass('hide').find('.OrderSubmit').hide();
+    $updateOrderForm.find('.dateId').removeClass('hide');
+    $('#updateOrderContainer').html($updateOrderForm.attr({
+      'id' : 'updateOrder',
+      'data-order-id' : data.bsId
+    }));
+    
     var orderRef = firebase
       .app()
       .database()
       .ref(`/oms/clients/${clientRef}/orders/${data.bsId}/fields`);
 
-      orderRef.once("value").then((snapshot) => {
-        var orderData = snapshot.val();
-        $editModal.find("#orderId").val(data.bsId);
-        $('#updateOrder').find('[name=vendor]').val(orderData.vendor).trigger('change');
-        // console.log(orderData);
-        
+    orderRef.once("value").then((snapshot) => {
+      var orderData = snapshot.val();
+      
+      // console.log(orderData);
+      $('#updateOrder').find('select').each(function(){
+        var $this = $(this);
+          var name = $this.attr("name");
+          $this.val(orderData[name]).trigger('change');
+      });
+
         $('#updateOrder')
-          .find(":input:visible")
-          .not("button")
+          .find(":input").not('button, select')
           .each(function () {
             var $this = $(this);
             var name = $this.attr("name");
-            $this.val(orderData[name]);//.find('[name=vendor]')
-            // if ($this.is("input")) {
-            //   $this.val(orderData[name]);
-            // }
+            $this.val(orderData[name]);
           });
-      });
+          $loading.hide();
+    });
   });
+
+
+  $editModal.on("hidden.bs.modal", function (event) {
+    $('#updateOrder').html('');
+  });
+  
 
   $("body").on("submit", "#updateOrder", function (event) {
     event.preventDefault();
     var fields = {};
-    var orderId = $("#orderId").val();
+    var orderId = $(this).attr('data-order-id');
+
     // $(this).find("[name=time]").text(moment().format("DD-MM-YYYY"));
     $(this)
       .find(":input")
@@ -462,12 +522,21 @@ $(document).ready(function () {
       });
 
     var obj = { fields: fields };
-    console.log(obj);
+    if(obj.fields.ref == '') {
+      obj.fields.ref = obj.fields.mobile.slice(-5);
+    }
+
+    if(!obj.fields.key || obj.fields.key == '') {
+      obj.fields.key = orderId;
+    }
+
+    // console.log(obj);
+
     var orderRef = firebase
       .app()
       .database()
       .ref(`/oms/clients/${clientRef}/orders/${orderId}`);
-    //createOrder(obj);
+
     orderRef.update(obj).then(function () {
       $(".modal").find(".btn-close").click();
       refreshOrders();
@@ -483,15 +552,26 @@ $(document).ready(function () {
   });
 
   //Calender Plugin
-  $("#fromdatepicker").datepicker({
+  $("#fromdatepicker, #fromdatepicker1").datepicker({
     dateFormat: "dd-mm-yy",
   });
-  $("#todatepicker").datepicker({
+  $("#todatepicker, #todatepicker1").datepicker({
     dateFormat: "dd-mm-yy",
   });
+  // $("#min.dataFormat").datepicker({
+  //   dateFormat: "dd-mm-yy",
+  // });
+  // $("#max.dataFormat").datepicker({
+  //   dateFormat: "dd-mm-yy",
+  // });
+
   $("#exportOrder").change(function () {
     $("#exportOrders .bulkBtn").attr("disabled", "disabled");
   });
+
+  // $("#deleteOrders").change(function () {
+  //   $("#deleteOrders .bulkBtn").attr("disabled", "disabled");
+  // });
 
   //convert date
   function formateDate(date) {
@@ -505,17 +585,29 @@ $(document).ready(function () {
   }
 
   var exportData;
-  $("#exportOrder").submit(function (event) {
+  // fetchTableOrders('exportOrder', 'exportTable');
+
+  $('#exportOrder').submit(function (event) {
     event.preventDefault();
+    fetchTableOrders(this, 'exportTable');
+  });
+
+  $('#deleteOrders').submit(function (event) {
+    event.preventDefault();
+    fetchTableOrders(this, 'deleteOrdersTable');
+  });
+
+  
+  function fetchTableOrders(order, table) {
     var filters = {};
-    $(this)
+    $(order)
       .find(":input")
       .not("button")
       .each(function () {
         filters[this.name] = $(this).val();
       });
 
-    firebase
+      firebase
       .app()
       .database()
       .ref(`/oms/clients/${clientRef}/orders`)
@@ -533,8 +625,6 @@ $(document).ready(function () {
           return order.vendor == filters.vendor;
         });
 
-        // console.log(filters.fromdatepicker, filters.todatepicker);
-
         var startDate = new Date(formateDate(filters.fromdatepicker));
         var endDate;
 
@@ -544,21 +634,19 @@ $(document).ready(function () {
           endDate = new Date(formateDate(filters.todatepicker));
         }
 
-        // console.log('endDate-'+formateDate(filters.todatepicker));
-
         var resultProductData = filteredOrders.filter(function (order) {
           var date = new Date(formateDate(order.time));
-          // console.log(date, startDate, endDate);
           return date >= startDate && date <= endDate;
         });
 
-        if ($.fn.DataTable.isDataTable("#exportTable")) {
-          $("#exportTable").dataTable().fnDestroy();
+        if ($.fn.DataTable.isDataTable('#'+table)) {
+          $('#'+table).dataTable().fnDestroy();
         }
+
         exportData = resultProductData;
-        renderOrders("exportTable", resultProductData, false);
+        renderOrders(table, resultProductData, false);
       });
-  });
+  }
 
   $(".bulkBtn").click(function (e) {
     e.preventDefault();
@@ -680,7 +768,7 @@ $(document).ready(function () {
     //   $form.find("[name=country]").val(country).attr("readonly", "");
     // }
 
-    
+
   });
 
   //Tracking Code
@@ -714,6 +802,8 @@ $(document).ready(function () {
         $.each(filteredOrders, function (key, value) {
           this.tracking = this.vendor + "_" + this.tracking;
         });
+
+        
 
         $("#trackingTable").DataTable({
           responsive: true,
@@ -814,27 +904,58 @@ $(document).ready(function () {
   });
 
   //Mobile Number Validation
-  $('[name=mobile]').blur(function(e) {
+  $('[name=mobile]').blur(function (e) {
     e.preventDefault();
     var $form = $(e.target).closest('form');
     var mobile = $form.find('[name=mobile');
-    var  message = $form.find('.mobileMessage');
+    var message = $form.find('.mobileMessage');
     $form.find('.mobileMessage');
-    if(!mobile.val().match('[0-9]{10}'))  {
-        console.log("Please put 10 digit mobile number");
-        message.addClass('error').removeClass('hide');
-        message[0].innerHTML = "Required 10 digits for mobile number";
-        return;
+    if (!mobile.val().match('[0-9]{10}')) {
+      // console.log("Please put 10 digit mobile number");
+      message.addClass('error').removeClass('hide');
+      message[0].innerHTML = "Required 10 digits for mobile number";
+      return;
     } else {
       message.addClass('hide')
     }
   });
 
+  //Date search in data tables
+  // var minDate, maxDate;
+  // // Custom filtering function which will search data in column four between two values
+  // $.fn.dataTable.ext.search.push(
+  //     function( settings, data, dataIndex ) {
+  //         var min = minDate.val();
+  //         var max = maxDate.val();
+  //         var date = new Date( data[4] );
   
+  //         if (
+  //             ( min === null && max === null ) ||
+  //             ( min === null && date <= max ) ||
+  //             ( min <= date   && max === null ) ||
+  //             ( min <= date   && date <= max )
+  //         ) {
+  //             return true;
+  //         }
+  //         return false;
+  //     }
+  // );
+  // Create date inputs
+  // minDate = new DateTime($('#min'), {
+  //   format: 'DD-MM-YYYY'
+  // });
+  // maxDate = new DateTime($('#max'), {
+  //     format: 'DD-MM-YYYY'
+  // });
+
+  // // Refilter the table
+  // $('#min, #max').on('change', function () {
+  //   currentTable.draw();
+  // })
 
 });
 
-window.onload = function(){
+window.onload = function () {
   // initForm();
 }
 
@@ -1010,6 +1131,21 @@ function generateXL(type, data) {
   if (typeof console !== "undefined") console.log(new Date());
 }
 
+$(document).ready(function(){
+  // delhiveryApis(
+  //   "GET",
+  //   "/api/v1/packages//",
+  //   {
+  //     token: clientKeyD,
+  //     waybill: '6218910003032',
+  //   },
+  //   function(resp){
+  //     console.log(resp)
+  //   },
+  //   ''
+  // );
+})
+
 function delhiveryApis(method, service, data, callback, target) {
   $.ajax({
     type: method,
@@ -1046,17 +1182,17 @@ function pincodeCallback(data, target) {
       .addClass("error")
       .removeClass("success")
       .text("Invalid or Unservicable Pincode");
-      // $form.find('[name=city]').val('');
-      // $form.find('[name=state]').val('');
-      // $form.find('[name=country]').val('');
+    // $form.find('[name=city]').val('');
+    // $form.find('[name=state]').val('');
+    // $form.find('[name=country]').val('');
   } else {
     $ele
       .next("span")
       .removeClass("error")
       .addClass("success")
       .text("Servicable Pincode");
-      // $form.find('[name=city]').val('');
-      // $form.find('[name=state]').val('');
-      // $form.find('[name=country]').val('');
+    // $form.find('[name=city]').val('');
+    // $form.find('[name=state]').val('');
+    // $form.find('[name=country]').val('');
   }
 }
