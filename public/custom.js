@@ -34,9 +34,9 @@ var clientName = 'SUJATHA 0052070';
 // var clientName = 'ACHYUTHA0043179-B2C';
 
 //Prod Keys
-var clientKeyD = "24aa5cc97aaa632e448440c31b18176506267b1e";
-var urlD = "https://track.delhivery.com";
-var clientName = 'ACHYUTHA 0043179';
+// var clientKeyD = "24aa5cc97aaa632e448440c31b18176506267b1e";
+// var urlD = "https://track.delhivery.com";
+// var clientName = 'ACHYUTHA 0043179';
 
 firebase.initializeApp(firebaseConfig);
 
