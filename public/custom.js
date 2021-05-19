@@ -1,48 +1,19 @@
-//AA Jewels
-// const firebaseConfig = {
-//   apiKey: "AIzaSyCXEYAGXm0uV9M1bDbvL4HWlBBes5eo9DU",
-//   authDomain: "aa-jewel-oms.firebaseapp.com",
-//   databaseURL:
-//     "https://aa-jewel-oms-default-rtdb.europe-west1.firebasedatabase.app",
-//   projectId: "aa-jewel-oms",
-//   storageBucket: "aa-jewel-oms.appspot.com",
-//   messagingSenderId: "986868631414",
-//   appId: "1:986868631414:web:8b0c71b9bf9a989aecdc57",
-//   measurementId: "G-S7KHKNNSNW",
-// };
-//Sujatha
-const firebaseConfig = {
-  apiKey: "AIzaSyDC7WBF3_-NLb55bziNX-_ybpGxTIGOI1s",
-  authDomain: "sujatha-gold-covering.firebaseapp.com",
-  databaseURL: "https://sujatha-gold-covering-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "sujatha-gold-covering",
-  storageBucket: "sujatha-gold-covering.appspot.com",
-  messagingSenderId: "944519518698",
-  appId: "1:944519518698:web:8c47c36c1124655c65ba93"
-};
 
-//Sujatha Prod Keys
-var clientKeyD = "b2c773ff4eafd8a7fa4f87b1c847837afc37aab8";
-var urlD = "https://track.delhivery.com";
-var clientName = 'SUJATHA 0052070';
+//Mantra Fashion Jewellery
+const firebaseConfig = window.firebaseConfig;
 
-
-//Delhivery APIs
-//Stage Keys
-// var clientKeyD = '8da3f652893522c4b1176d367ced95d90305d4f4';
-// var urlD = 'https://staging-express.delhivery.com';
-// var clientName = 'ACHYUTHA0043179-B2C';
-
-//Prod Keys
-// var clientKeyD = "24aa5cc97aaa632e448440c31b18176506267b1e";
-// var urlD = "https://track.delhivery.com";
-// var clientName = 'ACHYUTHA 0043179';
+//API keys variables
+var clientKeyD;
+var urlD;
+var clientName;
 
 firebase.initializeApp(firebaseConfig);
 
 const clientRef = "-M_M99xUv7WD4c-I2-0z";
 
 const profileRef = "-M_QfL7YC2Bc9s9UMVCB";
+
+const apiKeysRef = "-Ma1U51_omY_C4ZWMEWq";
 
 let ordersData;
 
@@ -51,6 +22,43 @@ let fecthDataOrders;
 let profileData;
 
 var userExists = false;
+
+//One-time use to push keys
+// function pushApiKeys() {
+//   var data = {
+//     clientKeyD: 'b2c773ff4eafd8a7fa4f87b1c847837afc37aab8',
+//       urlD: 'https://track.delhivery.com',
+//       clientName: 'SUJATHA 0052070'
+//   };
+//   firebase
+//       .app()
+//       .database()
+//       .ref(`/oms/clients/${clientRef}/apiKeys/delhivery/${apiKeysRef}`)
+//       .update(data)
+//       .then(function (resp) {
+//         console.log('API Keys Posted');
+//       });
+// }
+
+//Fetch API keys
+function fetchApiKeys() {
+  firebase
+    .app()
+    .database()
+    .ref(`/oms/clients/${clientRef}/apiKeys`)
+    .once("value")
+    .then((snapshot) => {
+      var apiKeys = snapshot.val();
+      var delhiveryKeys = apiKeys.delhivery[apiKeysRef];
+      // console.  log(apiKeys);
+      clientKeyD = delhiveryKeys.clientKeyD;
+      urlD = delhiveryKeys.urlD;
+      clientName = delhiveryKeys.clientName;
+    });
+}
+
+//Fetch all required API Keys
+fetchApiKeys();
 
 function createOrder(data) {
   firebase
@@ -65,6 +73,7 @@ function createOrder(data) {
 }
 
 function updateProfile(data) {
+  $loading.show();
   firebase
     .app()
     .database()
@@ -72,6 +81,7 @@ function updateProfile(data) {
     .update(data)
     .then(function () {
       console.log("profile data posted");
+      $loading.hide();
     });
 }
 
@@ -98,24 +108,6 @@ function createCustomer(data) {
     .then(function () {
       console.log("customer data posted");
     });
-
-  //Insert reseller as customer
-  // if(data.rname.length) {
-  //   var ruser = {
-  //     name: data.rname,
-  //     mobile: data.rmobile,
-  //     isReseller: true
-  //   }
-  //   var robj = { user: ruser };
-  //   firebase
-  //   .app()
-  //   .database()
-  //   .ref(`/oms/clients/${clientRef}/customers`)
-  //   .push(robj)
-  //   .then(function () {
-  //     console.log("reseller data posted");
-  //   });
-  // }
 }
 
 function fetchProfile() {
@@ -221,8 +213,10 @@ $('#orders-tab').click(function () {
 
 //Refresh Orders
 function refreshOrders() {
-  $("#example").dataTable().fnDestroy();
-  fetchOrders("example");
+  if ($.fn.DataTable.isDataTable('#example')) {
+    $("#example").dataTable().fnDestroy();
+    fetchOrders("example");
+  }
 }
 
 //Fetch Orders
@@ -461,11 +455,7 @@ $(document).ready(function () {
 
   var $editModal = $("#editModal");
   $editModal.on("show.bs.modal", function (event) {
-    // event.preventDefault();
     var row = event.relatedTarget;
-    // if(!$(row).find('.checkOrder')) {
-    //   event.stopPropagation();
-    // }
     var data = $(row).data();
     $loading.show();
     var $updateOrderForm = $('#createOrder').clone(true);
@@ -558,20 +548,10 @@ $(document).ready(function () {
   $("#todatepicker, #todatepicker1").datepicker({
     dateFormat: "dd-mm-yy",
   });
-  // $("#min.dataFormat").datepicker({
-  //   dateFormat: "dd-mm-yy",
-  // });
-  // $("#max.dataFormat").datepicker({
-  //   dateFormat: "dd-mm-yy",
-  // });
 
   $("#exportOrder").change(function () {
     $("#exportOrders .bulkBtn").attr("disabled", "disabled");
   });
-
-  // $("#deleteOrders").change(function () {
-  //   $("#deleteOrders .bulkBtn").attr("disabled", "disabled");
-  // });
 
   //convert date
   function formateDate(date) {
@@ -754,21 +734,6 @@ $(document).ready(function () {
         userExists = true;
       });
 
-    // var obj = window.pincodes.filter(function (key) {
-    //   return key.pin == pincode;
-    // });
-
-    // if (obj.length) {
-    //   city = obj[0].city;
-    //   state = obj[0].State;
-    //   country = "India";
-    //   console.log(city, state, country);
-    //   $form.find("[name=city]").val(city).attr("readonly", "");
-    //   $form.find("[name=state]").val(state).attr("readonly", "");
-    //   $form.find("[name=country]").val(country).attr("readonly", "");
-    // }
-
-
   });
 
   //Tracking Code
@@ -855,44 +820,10 @@ $(document).ready(function () {
           columns: [
             { title: "Name", data: "name" },
             { title: "Mobile", data: "mobile" },
-            // { title: "Pincode", data: "pincode" },
-            // { title: "Reseller", data: "rname" },
-            // {
-            //   title: "Courier",
-            //   data: "vendor",
-            //   render: function (data) {
-            //     var courier = "";
-            //     switch (data) {
-            //       case "1":
-            //         courier = "India Post";
-            //         break;
-            //       case "2":
-            //         courier = "Delhivery";
-            //         break;
-            //       case "3":
-            //         courier = "DTDC";
-            //         break;
-            //     }
-            //     return courier;
-            //   },
-            // },
             {
               title: "Tracking",
               data: "tracking",
               render: function (data) {
-                // var link;
-                // if (data && data.length) {
-                //   var courier = "";
-                //   // if(vendor == '1') {
-                //   //   courier = "india-post";
-                //   // } else if (vendor == '2') {
-                //   //   courier = "delhivery";
-                //   // } else if (vendor == '3') {
-                //   //   courier = "dtdc";
-                //   // }
-                //   // link = 'https://track.aftership.com/trackings?courier='+courier+'&tracking-numbers='+data;
-                //   // return '<a target="_blank" href="'+link+'">'+data+'</a>';
-                // }
                 return data;
               },
             },
@@ -919,44 +850,15 @@ $(document).ready(function () {
       message.addClass('hide')
     }
   });
-
-  //Date search in data tables
-  // var minDate, maxDate;
-  // // Custom filtering function which will search data in column four between two values
-  // $.fn.dataTable.ext.search.push(
-  //     function( settings, data, dataIndex ) {
-  //         var min = minDate.val();
-  //         var max = maxDate.val();
-  //         var date = new Date( data[4] );
-  
-  //         if (
-  //             ( min === null && max === null ) ||
-  //             ( min === null && date <= max ) ||
-  //             ( min <= date   && max === null ) ||
-  //             ( min <= date   && date <= max )
-  //         ) {
-  //             return true;
-  //         }
-  //         return false;
-  //     }
-  // );
-  // Create date inputs
-  // minDate = new DateTime($('#min'), {
-  //   format: 'DD-MM-YYYY'
-  // });
-  // maxDate = new DateTime($('#max'), {
-  //     format: 'DD-MM-YYYY'
-  // });
-
-  // // Refilter the table
-  // $('#min, #max').on('change', function () {
-  //   currentTable.draw();
-  // })
-
 });
 
 window.onload = function () {
   // initForm();
+  setTimeout(function(){
+    if(!$('.loading').hasClass('hide')) {
+      $('.loading').addClass('hide')
+    }
+  }, 5000);
 }
 
 function generateXL(type, data) {
@@ -1131,20 +1033,20 @@ function generateXL(type, data) {
   if (typeof console !== "undefined") console.log(new Date());
 }
 
-$(document).ready(function(){
-  // delhiveryApis(
-  //   "GET",
-  //   "/api/v1/packages//",
-  //   {
-  //     token: clientKeyD,
-  //     waybill: '6218910003032',
-  //   },
-  //   function(resp){
-  //     console.log(resp)
-  //   },
-  //   ''
-  // );
-})
+// $(document).ready(function(){
+//   // delhiveryApis(
+//   //   "GET",
+//   //   "/api/v1/packages//",
+//   //   {
+//   //     token: clientKeyD,
+//   //     waybill: '6218910003032',
+//   //   },
+//   //   function(resp){
+//   //     console.log(resp)
+//   //   },
+//   //   ''
+//   // );
+// })
 
 function delhiveryApis(method, service, data, callback, target) {
   $.ajax({
@@ -1182,17 +1084,11 @@ function pincodeCallback(data, target) {
       .addClass("error")
       .removeClass("success")
       .text("Invalid or Unservicable Pincode");
-    // $form.find('[name=city]').val('');
-    // $form.find('[name=state]').val('');
-    // $form.find('[name=country]').val('');
   } else {
     $ele
       .next("span")
       .removeClass("error")
       .addClass("success")
       .text("Servicable Pincode");
-    // $form.find('[name=city]').val('');
-    // $form.find('[name=state]').val('');
-    // $form.find('[name=country]').val('');
   }
 }
