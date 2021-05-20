@@ -26,9 +26,9 @@ var userExists = false;
 //One-time use to push keys
 // function pushApiKeys() {
 //   var data = {
-//     clientKeyD: 'b2c773ff4eafd8a7fa4f87b1c847837afc37aab8',
+//     clientKeyD: '24aa5cc97aaa632e448440c31b18176506267b1e',
 //       urlD: 'https://track.delhivery.com',
-//       clientName: 'SUJATHA 0052070'
+//       clientName: 'ACHYUTHA 0043179'
 //   };
 //   firebase
 //       .app()
@@ -80,7 +80,7 @@ function updateProfile(data) {
     .ref(`/oms/clients/${clientRef}/profile/${profileRef}`)
     .update(data)
     .then(function () {
-      console.log("profile data posted");
+      // console.log("profile data posted");
       $loading.hide();
     });
 }
@@ -254,9 +254,13 @@ function renderOrders(div, data, isParse) {
     createdRow: function (row, parseData, dataIndex) {
       $(row).attr({
         "data-bs-id": parseData.key,
-        "data-bs-toggle": "modal",
+        //"data-bs-toggle": "modal",
         "data-bs-target": "#editModal",
       });
+      // console.log(parseData);
+      if(parseData.isDispatched) {
+        $(row).addClass('orderDispatched');
+      }
     },
     drawCallback: function () {
       if (div === "exportTable") {
@@ -276,11 +280,11 @@ function renderOrders(div, data, isParse) {
     },
     columns: [
       {
-        title: "<input disabled id='selectAll' type='checkbox' />",
+        title: "<input id='selectAll' type='checkbox' />",
         orderable: false,
         style: 'os',
         render: function () {
-          return "<input disabled name='rowOrder' class='checkOrder' type='checkbox' />"
+          return "<input name='rowOrder' class='checkOrder' type='checkbox' />"
         }
     },
       {
@@ -295,6 +299,7 @@ function renderOrders(div, data, isParse) {
       },
       { title: "Name", data: "name" },
       { title: "Mobile", data: "mobile" },
+      { title: "Reference", data: "ref" },
       { title: "Pincode", data: "pincode" },
       { title: "Reseller", data: "rname" },
       {
@@ -381,7 +386,7 @@ $(document).ready(function () {
       .find(":input")
       .not("button")
       .each(function () {
-        fields[this.name] = $(this).val();
+        fields[this.name] = $(this).val().trim();
       });
     var obj = { fields: fields };
     if(obj.fields.ref == '') {
@@ -453,23 +458,23 @@ $(document).ready(function () {
     initForm();
   });
 
-  var $editModal = $("#editModal");
-  $editModal.on("show.bs.modal", function (event) {
+
+  function editModalMethod(event) {
     var row = event.relatedTarget;
-    var data = $(row).data();
+    var data = row['data-order-id'];
     $loading.show();
     var $updateOrderForm = $('#createOrder').clone(true);
     $updateOrderForm.removeClass('hide').find('.OrderSubmit').hide();
     $updateOrderForm.find('.dateId').removeClass('hide');
     $('#updateOrderContainer').html($updateOrderForm.attr({
       'id' : 'updateOrder',
-      'data-order-id' : data.bsId
+      'data-order-id' : data
     }));
     
     var orderRef = firebase
       .app()
       .database()
-      .ref(`/oms/clients/${clientRef}/orders/${data.bsId}/fields`);
+      .ref(`/oms/clients/${clientRef}/orders/${data}/fields`);
 
     orderRef.once("value").then((snapshot) => {
       var orderData = snapshot.val();
@@ -490,8 +495,23 @@ $(document).ready(function () {
           });
           $loading.hide();
     });
+  }
+
+  // var $dataTable = $('.dataTable');
+  $('body').on('click', '.dataTable tbody tr', function(event){
+    // console.log(event.target);
+    if(!$(event.target).hasClass('checkOrder')) {
+      $("#editModal").modal('show', {
+        'data-order-id' : $(this).attr('data-bs-id')
+      });
+    }
   });
 
+  var $editModal = $("#editModal");
+  $editModal.on("show.bs.modal", function (event) {
+    // console.log(event, data);
+    editModalMethod(event);
+  });
 
   $editModal.on("hidden.bs.modal", function (event) {
     $('#updateOrder').html('');
@@ -602,7 +622,7 @@ $(document).ready(function () {
         });
 
         var filteredOrders = parseData.filter(function (order) {
-          return order.vendor == filters.vendor;
+          return (order.vendor == filters.vendor && !order.isDispatched);
         });
 
         var startDate = new Date(formateDate(filters.fromdatepicker));
@@ -833,6 +853,39 @@ $(document).ready(function () {
         // renderOrders("trackingTable", filteredOrders, false);
       });
   });
+
+  $('.dispatched').click(function(e){
+    e.preventDefault();
+    var table = $('#example');
+    var rows = table.find('tbody tr');
+    var selectedRows = [];
+    rows.each(function(){
+      var row = $(this);
+      var checkbox = row.find('.checkOrder');
+      var disp = checkbox.is(':checked');
+      if(disp) {
+        selectedRows.push(row.attr('data-bs-id'));
+      }
+    });
+    $(e.target).attr('disabled' , 'disabled');
+    markAsDispatched(selectedRows, e);
+  });
+
+  //Mark as dispatched
+  function markAsDispatched(data, e) {
+    $(data).each(function(index, val){
+      var orderId = val;
+      firebase
+      .app()
+      .database()
+      .ref(`/oms/clients/${clientRef}/orders/${orderId}/fields`)
+      .update({
+        isDispatched: true
+      })
+    });
+    refreshOrders();
+    $(e.target).removeAttr('disabled');
+  }
 
   //Mobile Number Validation
   $('[name=mobile]').blur(function (e) {
@@ -1077,7 +1130,7 @@ function pincodeCallback(data, target) {
   // console.log(pinCodeData);
   var $ele = $(target);
   var $form = $ele.closest("form")
-  console.log(pinCodeData);
+  // console.log(pinCodeData);
   if (pinCodeData.isInvalid) {
     $ele
       .next("span")

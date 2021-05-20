@@ -29,6 +29,9 @@
             color:green;
             font-size:11px;
         }
+        .odd.orderDispatched, .even.orderDispatched, .orderDispatched {
+            background-color: #32CD32 !important;
+        }
 
         .show, .show-2 , .show-cod{
             display: block !important;
@@ -53,9 +56,6 @@
             .modal-dialog {
             max-width: 800px; 
             }
-        }
-        table th, table td{
-            font-size: 14px;
         }
         .loading {
             display: none;
@@ -84,6 +84,9 @@
         #auth-modal .modal-content h3{
             padding: 0 27%;
             margin-bottom: 30px;
+        }
+        table {
+            font-size: 14px;
         }
     </style>
 </head>
@@ -269,17 +272,7 @@
                 </div>
             </div>
             <div class="tab-pane fade" id="myOrders" role="tabpanel" aria-labelledby="profile-tab">
-                <!-- <table class="table table-striped table-bordered">
-                    <tbody><tr>
-                        <td>From:</td>
-                        <td><input type="text" id="min" name="min" class="dataFormat"></td>
-                    </tr>
-                    <tr>
-                        <td>To:</td>
-                        <td><input type="text" id="max" name="max" class="dataFormat"></td>
-                    </tr>
-                </tbody>
-            </table> -->
+                <button class="btn btn-primary mb-3 col-3 mr-3 dispatched" type="submit">Mark as Dispatched</button>
                 <table id="example" class="table table-striped table-bordered" style="width:100%">
 
                 </table>
@@ -292,7 +285,7 @@
                         <label class="form-label">Courier Service</label>
                         <select required name="vendor" class="form-select" aria-label="Default select example">
                             <option value="1">India Post</option>
-                            <option value="2">Delhivery</option>
+                            <option value="2" selected>Delhivery</option>
                             <option value="3">DTDC</option>
                             <option value="4">Xpressbees</option>
                         </select>
