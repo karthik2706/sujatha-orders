@@ -292,6 +292,7 @@ function renderOrders(div, data, isParse) {
       {
         title: "Date",
         data: "time",
+        width: "10%",
         render: function (data) {
           if (data && data.length) {
             return data;
@@ -299,11 +300,11 @@ function renderOrders(div, data, isParse) {
           return "";
         },
       },
-      { title: "Name", data: "name" },
+      { title: "Name", data: "name", width: "10%"},
       { title: "Mobile", data: "mobile" },
       { title: "Reference", data: "ref" },
       { title: "Pincode", data: "pincode" },
-      { title: "Reseller", data: "rname" },
+      { title: "Reseller", data: "rname", width: "15%" },
       {
         title: "Courier",
         data: "vendor",
