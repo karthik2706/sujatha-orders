@@ -160,14 +160,15 @@ function orderSumitted(data, resp) {
     .html(
       (orderData.rname || profileData.cname) +
       "<br>" +
-      profileData.retAddress.replace(/(?:\r\n|\r|\n)/g, "<br>") +
-      "<br> Mobile: " +
+      ((orderData.vendor === '1') ? (profileData.retAddress.replace(/(?:\r\n|\r|\n)/g, "<br>") + '<br>') : '') +
+      "Mobile: " +
       (orderData.rmobile || profileData.cnumber)
     );
   // console.log(orderData.rmobile, profileData.cnumber);
   $("#createOrder")[0].reset();
   $("#createOrder").addClass("hide");
   $("#printBtn").removeClass("hide");
+  $("#saveBtn").removeClass("hide");
   $("#closePrintBtn").removeClass("hide");
 
   $printHtml.removeClass("hide");
@@ -269,14 +270,15 @@ function renderOrders(div, data, isParse) {
 
       if(div === 'deleteOrdersTable') {
         $('#selectAll, .checkOrder').removeAttr('disabled');
-        $('body').on('click', '#selectAll', function(){
-          var $table = $(this).closest('table');
-          var isChecked = $(this).is(':checked');
-          $table.find('tbody tr').each(function(){
-            $(this).find('td:first input')[0].checked = isChecked;
-          });
-        });
       }
+
+      $('body').on('click', '#selectAll', function(){
+        var $table = $(this).closest('table');
+        var isChecked = $(this).is(':checked');
+        $table.find('tbody tr').each(function(){
+          $(this).find('td:first input')[0].checked = isChecked;
+        });
+      });
     },
     columns: [
       {
@@ -335,6 +337,7 @@ function renderOrders(div, data, isParse) {
 function initForm() {
   console.log('init form');
   $("[name=vendor]").trigger('change');
+  $('#createOrder').find('.success').text('').removeClass('sucess');
 }
 
 function customSiginin(email, password) {
@@ -435,19 +438,34 @@ $(document).ready(function () {
     $btnEle.addClass("updateTracking").removeClass("editTracking").text("Save");
   });
 
+  $("body").on("click", "#saveBtn", function (e) {
+    e.preventDefault();
+    var element = document.getElementById("element-to-print");
+    var opt = {
+      margin: 1,
+      jsPDF: { unit: "in", format: "a5", orientation: "portrait" }
+    };
+    html2pdf().set(opt).from(element).save();
+  });
+
   $("body").on("click", "#printBtn", function (e) {
     e.preventDefault();
     var element = document.getElementById("element-to-print");
     var opt = {
       margin: 1,
-      jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+      jsPDF: { unit: "in", format: "a5", orientation: "portrait" }
     };
-    html2pdf().set(opt).from(element).save();
+    html2pdf().set(opt).from(element).output('blob').then(function(blob){
+      console.log(blob);
+      let url = URL.createObjectURL(blob);
+      window.open(url); //opens the pdf in a new tab
+    });
   });
 
   $("#closePrintBtn").on("click", function (e) {
     e.preventDefault();
     $("#printBtn").addClass("hide");
+    $("#saveBtn").addClass("hide");
     $("#closePrintBtn").addClass("hide");
     $("#createOrder").removeClass("hide");
     const $printHtml = $("#element-to-print");
@@ -677,12 +695,12 @@ $(document).ready(function () {
       options = options + "<option>" + key.trim() + "</option>";
     });
     var $pickupD = $form.find("[name=pickupD]").html(options);
-
+    var city = $form.find("[name=city]").val();
     if (val == 2) {
       $form.find(".hide-2").addClass("show-2");
       $pin.addClass("pinSearch");
     } else {
-      $form.find("[name=city]").val("").removeAttr("readonly");
+      $form.find("[name=city]").val(city).removeAttr("readonly");
       $form.find("[name=state]").val("").removeAttr("readonly");
       $form.find("[name=country]").val("").removeAttr("readonly");
       $form.find(".hide-2").removeClass("show-2");
@@ -854,8 +872,23 @@ $(document).ready(function () {
       });
   });
 
-  $('.dispatched').click(function(e){
+  var removeByAttr = function(arr, attr, value){
+      var i = arr.length;
+      while(i--){
+        if( arr[i] 
+            && arr[i].hasOwnProperty(attr) 
+            && (arguments.length > 2 && arr[i][attr] === value ) ){ 
+
+            arr.splice(i,1);
+
+        }
+      }
+      return arr;
+  }
+
+  $('.groupAction').click(function(e){
     e.preventDefault();
+    var $this = $(this);
     var table = $('#example');
     var rows = table.find('tbody tr');
     var selectedRows = [];
@@ -868,8 +901,29 @@ $(document).ready(function () {
       }
     });
     $(e.target).attr('disabled' , 'disabled');
-    markAsDispatched(selectedRows, e);
+    if($this.hasClass('dispatched')) {
+      markAsDispatched(selectedRows, e);
+    } else if($this.hasClass('printSlip')) {
+      printSlips(selectedRows, e);
+    } else if ($this.hasClass('deleteOrders')) {
+      deleteOrders(selectedRows, e);
+    }
   });
+
+  //Mark as dispatched
+  function deleteOrders(data, e) {
+    $(data).each(function(index, val){
+      var orderId = val;
+      firebase
+      .app()
+      .database()
+      .ref(`/oms/clients/${clientRef}/orders/${orderId}`)
+      .remove();
+      // removeByAttr(arr, 'key', orderId); 
+    });
+    refreshOrders();
+    $(e.target).removeAttr('disabled');
+  }
 
   //Mark as dispatched
   function markAsDispatched(data, e) {
@@ -885,6 +939,91 @@ $(document).ready(function () {
     });
     refreshOrders();
     $(e.target).removeAttr('disabled');
+  }
+
+  var countSlips;
+  //Print Slips
+  function printSlips(data, e) {
+    countSlips = data.length;
+    $printHtml = $("#bulk-to-print").html('');
+    $printHtml.removeClass('hide');
+
+    $(data).each(function(index, val){
+      var orderId = val;
+      var orderRef = firebase
+      .app()
+      .database()
+      .ref(`/oms/clients/${clientRef}/orders/${orderId}/fields`);
+
+      orderRef.once("value")
+        .then((snapshot) => {
+          var orderData = snapshot.val();
+          generatePdf(orderData, index);
+        });
+    });
+
+    $(e.target).removeAttr('disabled');
+    
+  }
+
+  //generate PDF
+  function generatePdf(data, index) {
+    var orderData = data;
+    var $pageBreak = $('<div class="html2pdf__page-break">');
+    
+    if (orderData.vendor === "1") {
+      $pageBreak.append('<h2>'+ "Registered Parcel" +'</h2><br>');
+    } else {
+      $pageBreak.append('<h2>'+ "Courier" +'</h2><br>');
+    }
+
+    // $printHtml.append('<div class="html2pdf__page-break"></div>');
+    // var $pageBreak = $printHtml.find(".html2pdf__page-break");
+    $pageBreak
+      .append("<div class='toAdd'><h4>To:</h4></div>")
+      .append(
+        orderData.name +
+        "<br>" +
+        orderData.address.replace(/(?:\r\n|\r|\n)/g, "<br>") +
+        "<br>" +
+        orderData.city +
+        "<br> Pincode: " +
+        orderData.pincode +
+        "<br> Mobile: " +
+        orderData.mobile
+      );
+      $pageBreak.append('<br><br><br><br>')
+      $pageBreak
+      .append("<div class='fromAdd'><h4>From:</h4></div>")
+      .append(
+        (orderData.rname || profileData.cname) +
+        "<br>" +
+        ((orderData.vendor === '1') ? (profileData.retAddress.replace(/(?:\r\n|\r|\n)/g, "<br>") + '<br>') : '') +
+        "Mobile: " +
+        (orderData.rmobile || profileData.cnumber)
+      );
+
+      $printHtml.append($pageBreak);
+      
+
+      if(index+1 === countSlips) {
+        // console.log(countSlips, index, $printHtml.height());
+        // $printHtml.css('height', $printHtml.height() * 1.25);
+        var element = $printHtml[0];
+        var opt = {
+          margin: 1,
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { scale: 2 },
+          pagesplit: true,
+          jsPDF: { unit: "in", format: "a5", orientation: "portrait" }
+        };
+        html2pdf().set(opt).from(element) //.save();
+        .output('blob').then(function(blob){
+            let url = URL.createObjectURL(blob);
+            window.open(url); //opens the pdf in a new tab
+            $printHtml.addClass('hide');
+          });
+      }
   }
 
   //Mobile Number Validation
