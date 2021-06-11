@@ -1,4 +1,3 @@
-
 //Mantra Fashion Jewellery
 const firebaseConfig = window.firebaseConfig;
 
@@ -145,24 +144,26 @@ function orderSumitted(data, resp) {
     .find(".toAdd")
     .html(
       orderData.name +
-      "<br>" +
-      orderData.address.replace(/(?:\r\n|\r|\n)/g, "<br>") +
-      "<br>" +
-      orderData.city +
-      "<br> Pincode: " +
-      orderData.pincode +
-      "<br> Mobile: " +
-      orderData.mobile
+        "<br>" +
+        orderData.address.replace(/(?:\r\n|\r|\n)/g, "<br>") +
+        "<br>" +
+        orderData.city +
+        "<br> Pincode: " +
+        orderData.pincode +
+        "<br> Mobile: " +
+        orderData.mobile
     );
 
   $printHtml
     .find(".fromAdd")
     .html(
       (orderData.rname || profileData.cname) +
-      "<br>" +
-      ((orderData.vendor === '1') ? (profileData.retAddress.replace(/(?:\r\n|\r|\n)/g, "<br>") + '<br>') : '') +
-      "Mobile: " +
-      (orderData.rmobile || profileData.cnumber)
+        "<br>" +
+        (orderData.vendor === "1"
+          ? profileData.retAddress.replace(/(?:\r\n|\r|\n)/g, "<br>") + "<br>"
+          : "") +
+        "Mobile: " +
+        (orderData.rmobile || profileData.cnumber)
     );
   // console.log(orderData.rmobile, profileData.cnumber);
   $("#createOrder")[0].reset();
@@ -178,10 +179,16 @@ function orderSumitted(data, resp) {
 
   //Create Delhivery WayBill Number
   if (orderData.vendor === "2") {
-    delhiveryApis('GET', '/waybill/api/fetch/json/', {
-      token: clientKeyD,
-      client_name: clientName
-    }, trackingDCallback, resp._delegate._path.pieces_);
+    delhiveryApis(
+      "GET",
+      "/waybill/api/fetch/json/",
+      {
+        token: clientKeyD,
+        client_name: clientName,
+      },
+      trackingDCallback,
+      resp._delegate._path.pieces_
+    );
   } else {
     refreshOrders();
   }
@@ -208,25 +215,37 @@ function trackingDCallback(data, OrderDetails) {
 }
 
 //Click on Order tab
-$('#orders-tab').click(function () {
+$("#orders-tab").click(function () {
   refreshOrders();
 });
 
 //Refresh Orders
 function refreshOrders() {
-  if ($.fn.DataTable.isDataTable('#example')) {
+  if ($.fn.DataTable.isDataTable("#example")) {
     $("#example").dataTable().fnDestroy();
     fetchOrders("example");
+  }
+}
+
+//Refresh Old Orders
+function refreshOldOrders() {
+  if ($.fn.DataTable.isDataTable("#oldOrdersexample")) {
+    $("#oldOrdersexample").dataTable().fnDestroy();
+    fetchOrders("oldOrdersexample");
   }
 }
 
 //Fetch Orders
 function fetchOrders(div) {
   $loading.show();
+  var orderRef = `/oms/clients/${clientRef}/orders`;
+  if(div == 'oldOrdersexample') {
+    orderRef = `/oms/clients/${clientRef}/oldOrders`;
+  }
   firebase
     .app()
     .database()
-    .ref(`/oms/clients/${clientRef}/orders`)
+    .ref(orderRef)
     .once("value")
     .then((snapshot) => {
       ordersData = snapshot.val();
@@ -249,9 +268,10 @@ function renderOrders(div, data, isParse) {
   }
 
   // currentTable =
-   $("#" + div).DataTable({
+  $("#" + div).DataTable({
     data: parseData,
-    order: [[ 1, "desc" ]],
+    order: [[1, "desc"]],
+    "lengthMenu": [[25, 50, -1], [25, 50, "All"]],
     createdRow: function (row, parseData, dataIndex) {
       $(row).attr({
         "data-bs-id": parseData.key,
@@ -259,8 +279,8 @@ function renderOrders(div, data, isParse) {
         "data-bs-target": "#editModal",
       });
       // console.log(parseData);
-      if(parseData.isDispatched) {
-        $(row).addClass('orderDispatched');
+      if (parseData.isDispatched) {
+        $(row).addClass("orderDispatched");
       }
     },
     drawCallback: function () {
@@ -268,15 +288,15 @@ function renderOrders(div, data, isParse) {
         $("#exportOrders .bulkBtn").removeAttr("disabled");
       }
 
-      if(div === 'deleteOrdersTable') {
-        $('#selectAll, .checkOrder').removeAttr('disabled');
+      if (div === "deleteOrdersTable") {
+        $("#selectAll, .checkOrder").removeAttr("disabled");
       }
 
-      $('body').on('click', '#selectAll', function(){
-        var $table = $(this).closest('table');
-        var isChecked = $(this).is(':checked');
-        $table.find('tbody tr').each(function(){
-          $(this).find('td:first input')[0].checked = isChecked;
+      $("body").on("click", "#selectAll", function () {
+        var $table = $(this).closest("table");
+        var isChecked = $(this).is(":checked");
+        $table.find("tbody tr").each(function () {
+          $(this).find("td:first input")[0].checked = isChecked;
         });
       });
     },
@@ -284,23 +304,24 @@ function renderOrders(div, data, isParse) {
       {
         title: "<input id='selectAll' type='checkbox' />",
         orderable: false,
-        style: 'os',
+        style: "os",
         render: function () {
-          return "<input name='rowOrder' class='checkOrder' type='checkbox' />"
-        }
-    },
+          return "<input name='rowOrder' class='checkOrder' type='checkbox' />";
+        },
+      },
       {
         title: "Date",
-        data: "time",
         width: "10%",
+        data: "time",
         render: function (data) {
           if (data && data.length) {
-            return data;
+            var from = data.split("-");
+            return from[2] + "-" + from[1] + "-" + from[0];
           }
           return "";
         },
       },
-      { title: "Name", data: "name", width: "10%"},
+      { title: "Name", data: "name", width: "10%" },
       { title: "Mobile", data: "mobile" },
       { title: "Reference", data: "ref" },
       { title: "Pincode", data: "pincode" },
@@ -336,21 +357,23 @@ function renderOrders(div, data, isParse) {
 }
 
 function initForm() {
-  console.log('init form');
-  $("[name=vendor]").trigger('change');
-  $('#createOrder').find('.success').text('').removeClass('sucess');
+  console.log("init form");
+  $("[name=vendor]").trigger("change");
+  $("#createOrder").find(".success").text("").removeClass("sucess");
 }
 
 function customSiginin(email, password) {
-  firebase.auth().signInWithEmailAndPassword(email, password)
-  .then((userCredential) => {
-    // Signed in
-    var user = userCredential.user;
-  })
-  .catch((error) => {
-    var errorCode = error.code;
-    var errorMessage = error.message;
-  });
+  firebase
+    .auth()
+    .signInWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+      // Signed in
+      var user = userCredential.user;
+    })
+    .catch((error) => {
+      var errorCode = error.code;
+      var errorMessage = error.message;
+    });
 }
 
 function authCheck() {
@@ -359,16 +382,17 @@ function authCheck() {
       // logged in do nothing
     } else {
       var ui = new firebaseui.auth.AuthUI(firebase.auth());
-      ui.start('#firebaseui-auth-container', {
+      ui.start("#firebaseui-auth-container", {
         signInOptions: [
           {
             provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-            signInMethod: firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD,
-          }
+            signInMethod:
+              firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD,
+          },
         ],
-        signInSuccessUrl: window.location.href
+        signInSuccessUrl: window.location.href,
       });
-      $('#auth-modal').addClass('show');
+      $("#auth-modal").addClass("show");
     }
   });
 }
@@ -376,13 +400,12 @@ function authCheck() {
 var $loading;
 
 $(document).ready(function () {
-
   authCheck();
-  $loading = $('.loading');
+  $loading = $(".loading");
   fetchOrders("example");
   fetchProfile();
 
-  $('body').on('submit', "#createOrder", function (event) {
+  $("body").on("submit", "#createOrder", function (event) {
     event.preventDefault();
     var fields = {};
     $(this).find("[name=time]").val(moment().format("DD-MM-YYYY"));
@@ -393,7 +416,7 @@ $(document).ready(function () {
         fields[this.name] = $(this).val().trim();
       });
     var obj = { fields: fields };
-    if(obj.fields.ref == '') {
+    if (obj.fields.ref == "") {
       obj.fields.ref = obj.fields.mobile.slice(-5);
     }
     createOrder(obj);
@@ -429,6 +452,14 @@ $(document).ready(function () {
       });
   });
 
+  $("#old-orders-tab").on("click", function (e) {
+    e.preventDefault();
+    if ($.fn.DataTable.isDataTable("#oldOrdersexample")) {
+      $("#oldOrdersexample").dataTable().fnDestroy();
+    }
+    fetchOrders("oldOrdersexample");
+  });
+
   $("#myOrders").on("click", ".editTracking", function (e) {
     e.preventDefault();
     var rowId = $(this).closest("tr").attr("id");
@@ -444,7 +475,7 @@ $(document).ready(function () {
     var element = document.getElementById("element-to-print");
     var opt = {
       margin: 1,
-      jsPDF: { unit: "in", format: "a5", orientation: "portrait" }
+      jsPDF: { unit: "in", format: "a5", orientation: "portrait" },
     };
     html2pdf().set(opt).from(element).save();
   });
@@ -454,13 +485,17 @@ $(document).ready(function () {
     var element = document.getElementById("element-to-print");
     var opt = {
       margin: 1,
-      jsPDF: { unit: "in", format: "a5", orientation: "portrait" }
+      jsPDF: { unit: "in", format: "a5", orientation: "portrait" },
     };
-    html2pdf().set(opt).from(element).output('blob').then(function(blob){
-      console.log(blob);
-      let url = URL.createObjectURL(blob);
-      window.open(url); //opens the pdf in a new tab
-    });
+    html2pdf()
+      .set(opt)
+      .from(element)
+      .output("blob")
+      .then(function (blob) {
+        console.log(blob);
+        let url = URL.createObjectURL(blob);
+        window.open(url); //opens the pdf in a new tab
+      });
   });
 
   $("#closePrintBtn").on("click", function (e) {
@@ -477,19 +512,20 @@ $(document).ready(function () {
     initForm();
   });
 
-
   function editModalMethod(event) {
     var row = event.relatedTarget;
-    var data = row['data-order-id'];
+    var data = row["data-order-id"];
     $loading.show();
-    var $updateOrderForm = $('#createOrder').clone(true);
-    $updateOrderForm.removeClass('hide').find('.OrderSubmit').hide();
-    $updateOrderForm.find('.dateId').removeClass('hide');
-    $('#updateOrderContainer').html($updateOrderForm.attr({
-      'id' : 'updateOrder',
-      'data-order-id' : data
-    }));
-    
+    var $updateOrderForm = $("#createOrder").clone(true);
+    $updateOrderForm.removeClass("hide").find(".OrderSubmit").hide();
+    $updateOrderForm.find(".dateId").removeClass("hide");
+    $("#updateOrderContainer").html(
+      $updateOrderForm.attr({
+        id: "updateOrder",
+        "data-order-id": data,
+      })
+    );
+
     var orderRef = firebase
       .app()
       .database()
@@ -497,31 +533,34 @@ $(document).ready(function () {
 
     orderRef.once("value").then((snapshot) => {
       var orderData = snapshot.val();
-      
-      // console.log(orderData);
-      $('#updateOrder').find('select').each(function(){
-        var $this = $(this);
-          var name = $this.attr("name");
-          $this.val(orderData[name]).trigger('change');
-      });
 
-        $('#updateOrder')
-          .find(":input").not('button, select')
-          .each(function () {
-            var $this = $(this);
-            var name = $this.attr("name");
-            $this.val(orderData[name]);
-          });
-          $loading.hide();
+      // console.log(orderData);
+      $("#updateOrder")
+        .find("select")
+        .each(function () {
+          var $this = $(this);
+          var name = $this.attr("name");
+          $this.val(orderData[name]).trigger("change");
+        });
+
+      $("#updateOrder")
+        .find(":input")
+        .not("button, select")
+        .each(function () {
+          var $this = $(this);
+          var name = $this.attr("name");
+          $this.val(orderData[name]);
+        });
+      $loading.hide();
     });
   }
 
   // var $dataTable = $('.dataTable');
-  $('body').on('click', '.dataTable tbody tr', function(event){
+  $("body").on("click", ".dataTable tbody tr", function (event) {
     // console.log(event.target);
-    if(!$(event.target).hasClass('checkOrder')) {
-      $("#editModal").modal('show', {
-        'data-order-id' : $(this).attr('data-bs-id')
+    if (!$(event.target).hasClass("checkOrder")) {
+      $("#editModal").modal("show", {
+        "data-order-id": $(this).attr("data-bs-id"),
       });
     }
   });
@@ -533,14 +572,13 @@ $(document).ready(function () {
   });
 
   $editModal.on("hidden.bs.modal", function (event) {
-    $('#updateOrder').html('');
+    $("#updateOrder").html("");
   });
-  
 
   $("body").on("submit", "#updateOrder", function (event) {
     event.preventDefault();
     var fields = {};
-    var orderId = $(this).attr('data-order-id');
+    var orderId = $(this).attr("data-order-id");
 
     // $(this).find("[name=time]").text(moment().format("DD-MM-YYYY"));
     $(this)
@@ -551,11 +589,11 @@ $(document).ready(function () {
       });
 
     var obj = { fields: fields };
-    if(obj.fields.ref == '') {
+    if (obj.fields.ref == "") {
       obj.fields.ref = obj.fields.mobile.slice(-5);
     }
 
-    if(!obj.fields.key || obj.fields.key == '') {
+    if (!obj.fields.key || obj.fields.key == "") {
       obj.fields.key = orderId;
     }
 
@@ -606,17 +644,16 @@ $(document).ready(function () {
   var exportData;
   // fetchTableOrders('exportOrder', 'exportTable');
 
-  $('#exportOrder').submit(function (event) {
+  $("#exportOrder").submit(function (event) {
     event.preventDefault();
-    fetchTableOrders(this, 'exportTable');
+    fetchTableOrders(this, "exportTable");
   });
 
-  $('#deleteOrders').submit(function (event) {
+  $("#deleteOrders").submit(function (event) {
     event.preventDefault();
-    fetchTableOrders(this, 'deleteOrdersTable');
+    fetchTableOrders(this, "deleteOrdersTable");
   });
 
-  
   function fetchTableOrders(order, table) {
     var filters = {};
     $(order)
@@ -626,7 +663,7 @@ $(document).ready(function () {
         filters[this.name] = $(this).val();
       });
 
-      firebase
+    firebase
       .app()
       .database()
       .ref(`/oms/clients/${clientRef}/orders`)
@@ -641,7 +678,7 @@ $(document).ready(function () {
         });
 
         var filteredOrders = parseData.filter(function (order) {
-          return (order.vendor == filters.vendor && !order.isDispatched);
+          return order.vendor == filters.vendor && !order.isDispatched;
         });
 
         var startDate = new Date(formateDate(filters.fromdatepicker));
@@ -658,8 +695,10 @@ $(document).ready(function () {
           return date >= startDate && date <= endDate;
         });
 
-        if ($.fn.DataTable.isDataTable('#'+table)) {
-          $('#'+table).dataTable().fnDestroy();
+        if ($.fn.DataTable.isDataTable("#" + table)) {
+          $("#" + table)
+            .dataTable()
+            .fnDestroy();
         }
 
         exportData = resultProductData;
@@ -720,9 +759,9 @@ $(document).ready(function () {
         state = obj[0].State;
         country = "India";
         // console.log(city, state, country);
-        $form.find("[name=city]").val(city);//.attr("readonly", "");
-        $form.find("[name=state]").val(state);//.attr("readonly", "");
-        $form.find("[name=country]").val(country);//.attr("readonly", "");
+        $form.find("[name=city]").val(city); //.attr("readonly", "");
+        $form.find("[name=state]").val(state); //.attr("readonly", "");
+        $form.find("[name=country]").val(country); //.attr("readonly", "");
       }
 
       delhiveryApis(
@@ -772,7 +811,6 @@ $(document).ready(function () {
           });
         userExists = true;
       });
-
   });
 
   //Tracking Code
@@ -806,8 +844,6 @@ $(document).ready(function () {
         $.each(filteredOrders, function (key, value) {
           this.tracking = this.vendor + "_" + this.tracking;
         });
-
-        
 
         $("#trackingTable").DataTable({
           responsive: true,
@@ -873,109 +909,141 @@ $(document).ready(function () {
       });
   });
 
-  var removeByAttr = function(arr, attr, value){
-      var i = arr.length;
-      while(i--){
-        if( arr[i] 
-            && arr[i].hasOwnProperty(attr) 
-            && (arguments.length > 2 && arr[i][attr] === value ) ){ 
-
-            arr.splice(i,1);
-
-        }
+  var removeByAttr = function (arr, attr, value) {
+    var i = arr.length;
+    while (i--) {
+      if (
+        arr[i] &&
+        arr[i].hasOwnProperty(attr) &&
+        arguments.length > 2 &&
+        arr[i][attr] === value
+      ) {
+        arr.splice(i, 1);
       }
-      return arr;
-  }
+    }
+    return arr;
+  };
 
-  $('.groupAction').click(function(e){
+  $(".groupAction").click(function (e) {
     e.preventDefault();
     var $this = $(this);
-    var table = $('#example');
-    var rows = table.find('tbody tr');
+    var table = $("#example");
+    var rows = table.find("tbody tr");
     var selectedRows = [];
-    rows.each(function(){
+    rows.each(function () {
       var row = $(this);
-      var checkbox = row.find('.checkOrder');
-      var disp = checkbox.is(':checked');
-      if(disp) {
-        selectedRows.push(row.attr('data-bs-id'));
+      var checkbox = row.find(".checkOrder");
+      var disp = checkbox.is(":checked");
+      if (disp) {
+        selectedRows.push(row.attr("data-bs-id"));
       }
     });
-    $(e.target).attr('disabled' , 'disabled');
-    if($this.hasClass('dispatched')) {
+    $(e.target).attr("disabled", "disabled");
+    if ($this.hasClass("dispatched")) {
       markAsDispatched(selectedRows, e);
-    } else if($this.hasClass('printSlip')) {
+    } else if ($this.hasClass("printSlip")) {
       printSlips(selectedRows, e);
-    } else if ($this.hasClass('deleteOrders')) {
+    } else if ($this.hasClass("deleteOrders")) {
       deleteOrders(selectedRows, e);
+    } else if ($this.hasClass("move-to-old")) {
+      moveToOldOrders(selectedRows, e);
     }
   });
 
   //Mark as dispatched
   function deleteOrders(data, e) {
-    $(data).each(function(index, val){
+    var tableId = $(e.target).closest('.tab-pane').attr('id');
+    $(data).each(function (index, val) {
+      var orderId = val;
+      var orderRef = `/oms/clients/${clientRef}/orders/${orderId}`;
+      if(tableId == 'oldOrders') {
+        orderRef = `/oms/clients/${clientRef}/oldOrders/${orderId}`;
+      }
+      firebase
+        .app()
+        .database()
+        .ref(orderRef)
+        .remove();
+      // removeByAttr(arr, 'key', orderId);
+    });
+    // refreshOrders();
+    if(tableId == 'oldOrders') {
+      refreshOldOrders();
+    } else {
+      refreshOrders();
+    }
+    $(e.target).removeAttr("disabled");
+  }
+
+  //Move to Old Orders
+  function moveToOldOrders(data, e) {
+    $(data).each(function (index, val) {
       var orderId = val;
       firebase
-      .app()
-      .database()
-      .ref(`/oms/clients/${clientRef}/orders/${orderId}`)
-      .remove();
-      // removeByAttr(arr, 'key', orderId); 
+        .app()
+        .database()
+        .ref(`/oms/clients/${clientRef}/orders/${orderId}`)
+        .once("value").then((snapshot) => {
+          var orderData = snapshot.val();
+          firebase
+            .app()
+            .database()
+            .ref(`/oms/clients/${clientRef}/oldOrders/${orderId}`)
+            .update(orderData);
+      });
     });
-    refreshOrders();
-    $(e.target).removeAttr('disabled');
+    deleteOrders(data, e);
+    $(e.target).removeAttr("disabled");
   }
 
   //Mark as dispatched
   function markAsDispatched(data, e) {
-    $(data).each(function(index, val){
+    $(data).each(function (index, val) {
       var orderId = val;
       firebase
-      .app()
-      .database()
-      .ref(`/oms/clients/${clientRef}/orders/${orderId}/fields`)
-      .update({
-        isDispatched: true
-      })
+        .app()
+        .database()
+        .ref(`/oms/clients/${clientRef}/orders/${orderId}/fields`)
+        .update({
+          isDispatched: true,
+        });
     });
     refreshOrders();
-    $(e.target).removeAttr('disabled');
+    $(e.target).removeAttr("disabled");
   }
 
   var countSlips;
   //Print Slips
   function printSlips(data, e) {
     countSlips = data.length;
-    $printHtml = $("#bulk-to-print").html('');
-    $printHtml.removeClass('hide');
+    $printHtml = $("#bulk-to-print").html("");
+    $printHtml.removeClass("hide");
 
-    $(data).each(function(index, val){
+    $(data).each(function (index, val) {
       var orderId = val;
       var orderRef = firebase
-      .app()
-      .database()
-      .ref(`/oms/clients/${clientRef}/orders/${orderId}/fields`);
+        .app()
+        .database()
+        .ref(`/oms/clients/${clientRef}/orders/${orderId}/fields`);
 
-      orderRef.once("value")
-        .then((snapshot) => {
-          var orderData = snapshot.val();
-          generatePdf(orderData, index);
-        });
+      orderRef.once("value").then((snapshot) => {
+        var orderData = snapshot.val();
+        generatePdf(orderData, index);
+      });
     });
 
-    $(e.target).removeAttr('disabled');
-    
+    $(e.target).removeAttr("disabled");
   }
 
   //generate PDF
   function generatePdf(data, index) {
     var orderData = data;
     var $pageBreak = $('<div class="html2pdf__page-break">');
-    
+
     if (orderData.vendor === "1") {
-      $pageBreak.append('<h2>'+ "Registered Parcel" +'</h2><br>');
+      $pageBreak.append("<h2>" + "Registered Parcel" + "</h2><br>");
     } else {
-      $pageBreak.append('<h2>'+ "Courier" +'</h2><br>');
+      $pageBreak.append("<h2>" + "Courier" + "</h2><br>");
     }
 
     // $printHtml.append('<div class="html2pdf__page-break"></div>');
@@ -984,75 +1052,79 @@ $(document).ready(function () {
       .append("<div class='toAdd'><h4>To:</h4></div>")
       .append(
         orderData.name +
-        "<br>" +
-        orderData.address.replace(/(?:\r\n|\r|\n)/g, "<br>") +
-        "<br>" +
-        orderData.city +
-        "<br> Pincode: " +
-        orderData.pincode +
-        "<br> Mobile: " +
-        orderData.mobile
+          "<br>" +
+          orderData.address.replace(/(?:\r\n|\r|\n)/g, "<br>") +
+          "<br>" +
+          orderData.city +
+          "<br> Pincode: " +
+          orderData.pincode +
+          "<br> Mobile: " +
+          orderData.mobile
       );
-      $pageBreak.append('<br><br><br><br>')
-      $pageBreak
+    $pageBreak.append("<br><br><br><br>");
+    $pageBreak
       .append("<div class='fromAdd'><h4>From:</h4></div>")
       .append(
         (orderData.rname || profileData.cname) +
-        "<br>" +
-        ((orderData.vendor === '1') ? (profileData.retAddress.replace(/(?:\r\n|\r|\n)/g, "<br>") + '<br>') : '') +
-        "Mobile: " +
-        (orderData.rmobile || profileData.cnumber)
+          "<br>" +
+          (orderData.vendor === "1"
+            ? profileData.retAddress.replace(/(?:\r\n|\r|\n)/g, "<br>") + "<br>"
+            : "") +
+          "Mobile: " +
+          (orderData.rmobile || profileData.cnumber)
       );
 
-      $printHtml.append($pageBreak);
-      
+    $printHtml.append($pageBreak);
 
-      if(index+1 === countSlips) {
-        // console.log(countSlips, index, $printHtml.height());
-        // $printHtml.css('height', $printHtml.height() * 1.25);
-        var element = $printHtml[0];
-        var opt = {
-          margin: 1,
-          image:        { type: 'jpeg', quality: 0.98 },
-          html2canvas:  { scale: 2 },
-          pagesplit: true,
-          jsPDF: { unit: "in", format: "a5", orientation: "portrait" }
-        };
-        html2pdf().set(opt).from(element) //.save();
-        .output('blob').then(function(blob){
-            let url = URL.createObjectURL(blob);
-            window.open(url); //opens the pdf in a new tab
-            $printHtml.addClass('hide');
-          });
-      }
+    if (index + 1 === countSlips) {
+      // console.log(countSlips, index, $printHtml.height());
+      // $printHtml.css('height', $printHtml.height() * 1.25);
+      var element = $printHtml[0];
+      var opt = {
+        margin: 1,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2 },
+        pagesplit: true,
+        jsPDF: { unit: "in", format: "a5", orientation: "portrait" },
+      };
+      html2pdf()
+        .set(opt)
+        .from(element) //.save();
+        .output("blob")
+        .then(function (blob) {
+          let url = URL.createObjectURL(blob);
+          window.open(url); //opens the pdf in a new tab
+          $printHtml.addClass("hide");
+        });
+    }
   }
 
   //Mobile Number Validation
-  $('[name=mobile]').blur(function (e) {
+  $("[name=mobile]").blur(function (e) {
     e.preventDefault();
-    var $form = $(e.target).closest('form');
-    var mobile = $form.find('[name=mobile');
-    var message = $form.find('.mobileMessage');
-    $form.find('.mobileMessage');
-    if (!mobile.val().match('[0-9]{10}')) {
+    var $form = $(e.target).closest("form");
+    var mobile = $form.find("[name=mobile");
+    var message = $form.find(".mobileMessage");
+    $form.find(".mobileMessage");
+    if (!mobile.val().match("[0-9]{10}")) {
       // console.log("Please put 10 digit mobile number");
-      message.addClass('error').removeClass('hide');
+      message.addClass("error").removeClass("hide");
       message[0].innerHTML = "Required 10 digits for mobile number";
       return;
     } else {
-      message.addClass('hide')
+      message.addClass("hide");
     }
   });
 });
 
 window.onload = function () {
   // initForm();
-  setTimeout(function(){
-    if(!$('.loading').hasClass('hide')) {
-      $('.loading').addClass('hide')
+  setTimeout(function () {
+    if (!$(".loading").hasClass("hide")) {
+      $(".loading").addClass("hide");
     }
   }, 5000);
-}
+};
 
 function generateXL(type, data) {
   var createXLSLFormatObj = [];
@@ -1256,7 +1328,6 @@ function delhiveryApis(method, service, data, callback, target) {
   });
 }
 
-
 var pinCodeData;
 function pincodeCallback(data, target) {
   if (data.delivery_codes.length) {
@@ -1269,7 +1340,7 @@ function pincodeCallback(data, target) {
   }
   // console.log(pinCodeData);
   var $ele = $(target);
-  var $form = $ele.closest("form")
+  var $form = $ele.closest("form");
   // console.log(pinCodeData);
   if (pinCodeData.isInvalid) {
     $ele
