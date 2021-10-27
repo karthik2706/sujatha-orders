@@ -781,36 +781,36 @@ $(document).ready(function () {
   $("#createOrder").on("blur", "[name=mobile]", function () {
     var mobile = $(this).val();
     var mobileData = [];
+    //Populate user details
+    // firebase
+    //   .app()
+    //   .database()
+    //   .ref(`/oms/clients/${clientRef}/customers`)
+    //   .once("value")
+    //   .then((snapshot) => {
+    //     customersData = snapshot.val();
+    //     $.each(customersData, function (key, value) {
+    //       mobileData.push(value.user);
+    //     });
 
-    firebase
-      .app()
-      .database()
-      .ref(`/oms/clients/${clientRef}/customers`)
-      .once("value")
-      .then((snapshot) => {
-        customersData = snapshot.val();
-        $.each(customersData, function (key, value) {
-          mobileData.push(value.user);
-        });
+    //     var obj = mobileData.filter(function (key) {
+    //       return key.mobile == mobile;
+    //     });
 
-        var obj = mobileData.filter(function (key) {
-          return key.mobile == mobile;
-        });
+    //     if (!obj.length) return;
 
-        if (!obj.length) return;
-
-        $("#createOrder")
-          .find(":input:visible")
-          .not("select")
-          .each(function () {
-            var $this = $(this);
-            var name = $this.attr("name");
-            if (obj) {
-              $this.val(obj[0][name] || "");
-            }
-          });
-        userExists = true;
-      });
+    //     $("#createOrder")
+    //       .find(":input:visible")
+    //       .not("select")
+    //       .each(function () {
+    //         var $this = $(this);
+    //         var name = $this.attr("name");
+    //         if (obj) {
+    //           $this.val(obj[0][name] || "");
+    //         }
+    //       });
+    //     userExists = true;
+    //   });
   });
 
   //Tracking Code
