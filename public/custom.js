@@ -271,7 +271,7 @@ function renderOrders(div, data, isParse) {
   $("#" + div).DataTable({
     data: parseData,
     order: [[1, "desc"]],
-    "lengthMenu": [[25, 50, -1], [25, 50, "All"]],
+    "lengthMenu": [[500, -1], [500, "All"]],
     createdRow: function (row, parseData, dataIndex) {
       $(row).attr({
         "data-bs-id": parseData.key,
@@ -992,7 +992,7 @@ $(document).ready(function () {
             .update(orderData);
       });
     });
-    deleteOrders(data, e);
+    // deleteOrders(data, e);
     $(e.target).removeAttr("disabled");
   }
 
