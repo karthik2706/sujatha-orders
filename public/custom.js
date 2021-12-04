@@ -219,12 +219,25 @@ $("#orders-tab").click(function () {
   refreshOrders();
 });
 
+//Click on Order tab
+$("#myold-orders-tab").click(function () {
+  refreshMyOldOrders();
+});
+
 //Refresh Orders
 function refreshOrders() {
   if ($.fn.DataTable.isDataTable("#example")) {
     $("#example").dataTable().fnDestroy();
     fetchOrders("example");
   }
+}
+
+//Refresh Old Orders
+function refreshMyOldOrders() {
+  if ($.fn.DataTable.isDataTable("#oldexample")) {
+    $("#oldexample").dataTable().fnDestroy();
+  }
+  fetchOrders("oldexample");
 }
 
 //Refresh Old Orders
@@ -253,6 +266,18 @@ function fetchOrders(div) {
       $loading.hide();
     });
 }
+
+//convert date
+function formateDates(date) {
+  if (date && date.length) {
+    var dateArr = date.split("-");
+    dateArr.reverse();
+    return dateArr.join("-");
+  } else {
+    return "null";
+  }
+}
+
 // var currentTable;
 function renderOrders(div, data, isParse) {
   let parseData;
@@ -267,11 +292,30 @@ function renderOrders(div, data, isParse) {
     parseData = data;
   }
 
+  console.log(div);
+
+  const today = moment();
+  const sevenDaysBefore = moment().subtract(7, 'days');
+
+  if(div === 'example') {
+    parseData = parseData.filter(function (order) {
+      var date = new Date(formateDates(order.time));
+      // console.log(date);
+      return date >= sevenDaysBefore && date <= today;
+    });
+  } else if(div === 'oldexample') {
+    parseData = parseData.filter(function (order) {
+      var date = new Date(formateDates(order.time));
+      // console.log(date);
+      return date < sevenDaysBefore;
+    });
+  }
+
   // currentTable =
   $("#" + div).DataTable({
     data: parseData,
     order: [[1, "desc"]],
-    "lengthMenu": [[500, -1], [500, "All"]],
+    "lengthMenu": [[25, 50, 100, 250, 500, -1], [25, 50, 100, 250, 500, "All"]],
     createdRow: function (row, parseData, dataIndex) {
       $(row).attr({
         "data-bs-id": parseData.key,
@@ -357,7 +401,7 @@ function renderOrders(div, data, isParse) {
 }
 
 function initForm() {
-  console.log("init form");
+  // console.log("init form");
   $("[name=vendor]").trigger("change");
   $("#createOrder").find(".success").text("").removeClass("sucess");
 }
@@ -998,6 +1042,11 @@ $(document).ready(function () {
 
   //Mark as dispatched
   function markAsDispatched(data, e) {
+    var isDone = false;
+    var $target = $(e.target);
+    if($target.hasClass('is-true')) {
+      isDone = true;
+    }
     $(data).each(function (index, val) {
       var orderId = val;
       firebase
@@ -1005,11 +1054,11 @@ $(document).ready(function () {
         .database()
         .ref(`/oms/clients/${clientRef}/orders/${orderId}/fields`)
         .update({
-          isDispatched: true,
+          isDispatched: isDone,
         });
     });
     refreshOrders();
-    $(e.target).removeAttr("disabled");
+    $target.removeAttr("disabled");
   }
 
   var countSlips;
@@ -1042,6 +1091,10 @@ $(document).ready(function () {
 
     if (orderData.vendor === "1") {
       $pageBreak.append("<h2>" + "Registered Parcel" + "</h2><br>");
+    } else if (orderData.vendor === "2") {
+      $pageBreak.append("<h1 class='logo-align center-align'><img src='suj.png'></h2><br>");
+      $pageBreak.append("<h2 class='center-align'>" + "Delhivery Courier" + "</h2><br>");
+      $pageBreak.append("<h3 class='center-align'><svg class='barcode-track' data-tracking="+orderData.tracking+"></svg></h3>");
     } else {
       $pageBreak.append("<h2>" + "Courier" + "</h2><br>");
     }
@@ -1076,6 +1129,12 @@ $(document).ready(function () {
 
     $printHtml.append($pageBreak);
 
+    $('.barcode-track').each(function(){
+      var $this = $(this);
+      var tracking = $this.attr('data-tracking');
+      $this.JsBarcode(tracking);
+    })
+
     if (index + 1 === countSlips) {
       // console.log(countSlips, index, $printHtml.height());
       // $printHtml.css('height', $printHtml.height() * 1.25);
@@ -1085,7 +1144,7 @@ $(document).ready(function () {
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: { scale: 2 },
         pagesplit: true,
-        jsPDF: { unit: "in", format: "a5", orientation: "portrait" },
+        jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
       };
       html2pdf()
         .set(opt)

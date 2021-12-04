@@ -47,6 +47,9 @@ build/Release
 # Dependency directories
 node_modules/
 
+# Dependency directories
+functions/node_modules/
+
 # Optional npm cache directory
 .npm
 
@@ -64,4 +67,6 @@ node_modules/
 
 # dotenv environment variables file
 .env
-.firebase/hosting.cHVibGlj.cache
+.firebase/
+functions/node_modules/
+functions/package-lock.json
