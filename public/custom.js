@@ -59,6 +59,19 @@ function fetchApiKeys() {
 //Fetch all required API Keys
 fetchApiKeys();
 
+
+ //Only admin should run
+ function deleteOldOrdersAdmin() {
+  firebase
+    .app()
+    .database()
+    .ref(`/oms/clients/${clientRef}/oldOrders`)
+    .remove()
+    .then((snapshot) => {
+      refreshMyOldOrders();
+    });
+}
+
 function createOrder(data) {
   firebase
     .app()
@@ -264,6 +277,48 @@ function fetchOrders(div) {
       ordersData = snapshot.val();
       renderOrders(div, ordersData, true);
       $loading.hide();
+    });
+}
+
+//delete old Orders
+function deleteOldOrders() {
+  $loading.show();
+  var orderRef = `/oms/clients/${clientRef}/orders`;
+ 
+  firebase
+    .app()
+    .database()
+    .ref(orderRef)
+    .once("value")
+    .then((snapshot) => {
+      ordersData = snapshot.val();
+      
+    const today = moment();
+    const sevenDaysBefore = moment().subtract(7, 'days');
+    var parseData = [];
+    
+    $.each(ordersData, function (key, value) {
+      value.fields.key = key;
+      parseData.push(value.fields);
+    });
+
+    console.log(parseData.length);
+    parseData = parseData.filter(function (order) {
+      var date = new Date(formateDates(order.time));
+      return date < sevenDaysBefore;
+    });
+    console.log(parseData.length);
+    $.each(parseData, function (key, value) {
+      var orderKey = this.key;
+      firebase
+        .app()
+        .database()
+        .ref(orderRef+'/'+orderKey)
+        .remove();
+    });
+    console.log(parseData.length);
+    // renderOrders(div, ordersData, true);
+    $loading.hide();
     });
 }
 
@@ -684,6 +739,8 @@ $(document).ready(function () {
       return "null";
     }
   }
+
+   
 
   var exportData;
   // fetchTableOrders('exportOrder', 'exportTable');
