@@ -8,6 +8,6 @@ const lodash = require('lodash');
 
 admin.initializeApp();
 
-exports.fetchWaybills = functions.https.onRequest((req, response) => {
+// exports.fetchWaybills = functions.https.onRequest((req, response) => {
    
-});
+// });
