@@ -61,16 +61,16 @@ fetchApiKeys();
 
 
  //Only admin should run
- function deleteOldOrdersAdmin() {
-  firebase
-    .app()
-    .database()
-    .ref(`/oms/clients/${clientRef}/oldOrders`)
-    .remove()
-    .then((snapshot) => {
-      refreshMyOldOrders();
-    });
-}
+//  function deleteOldOrdersAdmin() {
+//   firebase
+//     .app()
+//     .database()
+//     .ref(`/oms/clients/${clientRef}/oldOrders`)
+//     .remove()
+//     .then((snapshot) => {
+//       refreshMyOldOrders();
+//     });
+// }
 
 function createOrder(data) {
   firebase
@@ -272,9 +272,11 @@ function fetchOrders(div) {
     .app()
     .database()
     .ref(orderRef)
+    // .limitToFirst(500)
     .once("value")
     .then((snapshot) => {
       ordersData = snapshot.val();
+      console.log(Object.keys(ordersData).length);
       renderOrders(div, ordersData, true);
       $loading.hide();
     });
@@ -1149,7 +1151,7 @@ $(document).ready(function () {
     if (orderData.vendor === "1") {
       $pageBreak.append("<h2>" + "Registered Parcel" + "</h2><br>");
     } else if (orderData.vendor === "2") {
-      $pageBreak.append("<h1 class='logo-align center-align'><img src='suj.png'></h2><br>");
+      // $pageBreak.append("<h1 class='logo-align center-align'><img src='suj.png'></h2><br>");
       $pageBreak.append("<h2 class='center-align'>" + "Delhivery Courier" + "</h2><br>");
       $pageBreak.append("<h3 class='center-align'><svg class='barcode-track' data-tracking="+orderData.tracking+"></svg></h3>");
     } else {
@@ -1364,7 +1366,7 @@ function generateXL(type, data) {
         ShipmentBreadth: value.ShipmentBreadth || "10",
         ShipmentHeight: value.ShipmentHeight || "10",
         PaymentMode: value.cod == "1" ? "cod" : "prepaid",
-        PackageAmount: value.price,
+        PackageAmount: value.price || "5000",
         CodAmount: value.codprice,
         ProductToBeShipped: value.productName || "Artificial Jewel",
         ReturnAddress: profileData.retAddress,
@@ -1377,7 +1379,7 @@ function generateXL(type, data) {
         InvoiceNo: "",
         InvoiceDate: "",
         Quantity: value.qty || "1",
-        CommodityValue: value.price || "500",
+        CommodityValue: value.price || "5000",
         TaxValue: value.tax || "0",
         CategoryOfGoods: value.goods || "Artificial Jewel",
         SellerGSTTIN: "",
