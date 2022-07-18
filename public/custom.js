@@ -276,7 +276,7 @@ function fetchOrders(div) {
     .once("value")
     .then((snapshot) => {
       ordersData = snapshot.val();
-      console.log(Object.keys(ordersData).length);
+      // console.log(Object.keys(ordersData).length);
       renderOrders(div, ordersData, true);
       $loading.hide();
     });
@@ -349,7 +349,7 @@ function renderOrders(div, data, isParse) {
     parseData = data;
   }
 
-  console.log(div);
+  // console.log(div);
 
   const today = moment();
   const sevenDaysBefore = moment().subtract(7, 'days');
@@ -839,7 +839,7 @@ $(document).ready(function () {
     });
     var $pickupD = $form.find("[name=pickupD]").html(options);
     var city = $form.find("[name=city]").val();
-    if (val == 2) {
+    if (val == 2 || val == 4) {
       $form.find(".hide-2").addClass("show-2");
       $pin.addClass("pinSearch");
     } else {
@@ -849,24 +849,29 @@ $(document).ready(function () {
       $form.find(".hide-2").removeClass("show-2");
       $pin.removeClass("pinSearch");
     }
+  });
 
-    $form.on("blur", ".pinSearch", function (event) {
-      var city, state, country;
-      var pincode = $(".pinSearch").val();
-      var obj = window.pincodes.filter(function (key) {
-        return key.pin == pincode;
-      });
+  $('body').on("blur", '.pinSearch', function (event) {
+    var city, state, country;
+    var $this = $(this);
+    var $form = $this.closest("form");
+    var pincode = $this.val();
+    var val = $form.find('[name=vendor').val();
 
-      if (obj.length) {
-        city = obj[0].city;
-        state = obj[0].State;
-        country = "India";
-        // console.log(city, state, country);
-        $form.find("[name=city]").val(city); //.attr("readonly", "");
-        $form.find("[name=state]").val(state); //.attr("readonly", "");
-        $form.find("[name=country]").val(country); //.attr("readonly", "");
-      }
+    var obj = window.pincodes.filter(function (key) {
+      return key.pin == pincode;
+    });
 
+    if (obj.length) {
+      city = obj[0].city;
+      state = obj[0].State;
+      country = "India";
+      $form.find("[name=city]").val(city); //.attr("readonly", "");
+      $form.find("[name=state]").val(state); //.attr("readonly", "");
+      $form.find("[name=country]").val(country); //.attr("readonly", "");
+    }
+    
+    if(val == '2') {
       delhiveryApis(
         "GET",
         "/c/api/pin-codes/json/",
@@ -877,7 +882,10 @@ $(document).ready(function () {
         pincodeCallback,
         event.target
       );
-    });
+    } else if (val == '4') {
+      console.log('xpress pincode');
+    }
+
   });
 
   //Phone number fetch
@@ -1389,6 +1397,97 @@ function generateXL(type, data) {
         EWBN: "",
       });
     });
+  } else if (type == "4") {
+    /* XLS Head Columns */
+    xlsHeader = [
+      "Order ID",
+      "Payment Type",
+      "Pickup From",
+      "Consigner Name",
+      "Consigner Phone",
+      "Consigner Address",
+      "Consigner City",
+      "Consigner State",
+      "Consigner Pincode",
+      "Consigner GST",
+      "Consignee Name",
+      "Consignee Phone",
+      "Consignee Address",
+      "Consignee City",
+      "Consignee State",
+      "Consignee Pincode",
+      "Consignee GST",
+      "Courier Mode",
+      "Invoice Number",
+      "Invoice Date",
+      "EBN Number",
+      "EBN Expiry",
+      "Weight(gm)",
+      "Length(cm)",
+      "Height(cm)",
+      "Breadth(cm)",
+      "SKU(1)",
+      "Product(1)",
+      "Quantity(1)",
+      "Price(1)",
+      "HSN(1)",
+      "SKU(2)",
+      "Product(2)",
+      "Quantity(2)",
+      "Price(2)",
+      "HSN(2)",
+      "SKU(3)",
+      "Product(3)",
+      "Quantity(3)",
+      "Price(3)",
+      "HSN(3)"
+    ];
+
+    $.each(data, function (index, value) {
+      xlsRows.push({
+        OrderID: value.ref.replace(' ', '-') + value.mobile.slice(-5),
+        PaymentType: value.cod == "1" ? "COD" : "Prepaid",
+        PickupFrom: 'Consigner',
+        ConsignerName: 'Sujatha one gram',
+        ConsignerPhone: '8886428888',
+        ConsignerAddress: 'Sujatha gold covering works Near chilkalapudi circle, Machilipatnam',
+        ConsignerCity: 'Machilipatnam',
+        ConsignerState: 'Andhra Pradesh',
+        ConsignerPincode: '521003',
+        ConsignerGST: '',
+        ConsigneeName: value.name,
+        ConsigneePhone: value.mobile.replace("+91", ""),
+        ConsigneeAddress: value.address.replace(/\s+/g, ' ').trim(),
+        ConsigneeCity: value.city,
+        ConsigneeState: value.state,
+        ConsigneePincode: value.pincode,
+        ConsigneeGST: '',
+        CourierMode:  'Surface' ,
+        InvoiceNumber: '',
+        InvoiceDate: '',
+        EBNNumber: '',
+        EBNExpiry: '',
+        Weight: '100',
+        Length: '10',
+        Height: '10',
+        Breadth: '10',
+        SKU1 : '0',
+        Product1: 'Artificial Jewel',
+        Quantity1: value.qty || "1",
+        Price1 : value.price || "5000",
+        HSN1 : '0',
+        SKU2 : '0',
+        Product2: '0',
+        Quantity2: '0',
+        Price2 : "0",
+        HSN2 : '0',
+        SKU3 : '0',
+        Product5: '0',
+        Quantity3: '0',
+        Price3 : '0',
+        HSN3 : '0'
+      });
+    });
   } else {
     console.log("Export is not available for this vendor");
     return;
@@ -1404,38 +1503,63 @@ function generateXL(type, data) {
   });
 
   /* File Name */
-  var filename = "Bulk_Order.xlsx";
+  var filename = "Delhivery_Bulk_Order.xlsx";
+
+  if(type == '4') {
+    filename = "XpressBee_Bulk_Order.csv";
+  }
 
   /* Sheet Name */
   var ws_name = "Sheet1";
 
   if (typeof console !== "undefined") console.log(new Date());
+  
   var wb = XLSX.utils.book_new(),
     ws = XLSX.utils.aoa_to_sheet(createXLSLFormatObj);
 
-  /* Add worksheet to workbook */
-  XLSX.utils.book_append_sheet(wb, ws, ws_name);
+  var csv = XLSX.utils.sheet_to_csv(ws, { strip: true });
 
-  /* Write workbook and Download */
-  if (typeof console !== "undefined") console.log(new Date());
-  XLSX.writeFile(wb, filename);
-  if (typeof console !== "undefined") console.log(new Date());
+  // if(type != '4') {
+    
+  // } else {
+  //   var wb = XLSX.utils.book_new(),
+  //   ws = XLSX.utils.sheet_to_csv(createXLSLFormatObj);
+  // }
+
+
+  if(type == '4') {
+    download_file(csv, filename, 'text/csv;encoding:utf-8');
+  } else {
+    /* Add worksheet to workbook */
+    XLSX.utils.book_append_sheet(wb, ws, ws_name);
+    /* Write workbook and Download */
+    if (typeof console !== "undefined") console.log(new Date());
+    XLSX.writeFile(wb, filename);
+    if (typeof console !== "undefined") console.log(new Date());
+  }
 }
 
-// $(document).ready(function(){
-//   // delhiveryApis(
-//   //   "GET",
-//   //   "/api/v1/packages//",
-//   //   {
-//   //     token: clientKeyD,
-//   //     waybill: '6218910003032',
-//   //   },
-//   //   function(resp){
-//   //     console.log(resp)
-//   //   },
-//   //   ''
-//   // );
-// })
+function download_file(content, fileName, mimeType) {
+  var a = document.createElement('a');
+  mimeType = mimeType || 'application/octet-stream';
+
+  if (navigator.msSaveBlob) { // IE10
+      navigator.msSaveBlob(new Blob([content], {
+          type: mimeType
+      }), fileName);
+  } else if (URL && 'download' in a) { //html5 A[download]
+      a.href = URL.createObjectURL(new Blob([content], {
+          type: mimeType
+      }));
+      a.setAttribute('download', fileName);
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+  } else {
+      location.href = 'data:application/octet-stream,' + encodeURIComponent(content); // only this mime type is supported
+  }
+}  
+
 
 function delhiveryApis(method, service, data, callback, target) {
   $.ajax({
