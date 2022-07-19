@@ -60,7 +60,7 @@ function fetchApiKeys() {
 fetchApiKeys();
 
 
- //Only admin should run
+//Only admin should run
 //  function deleteOldOrdersAdmin() {
 //   firebase
 //     .app()
@@ -79,7 +79,8 @@ function createOrder(data) {
     .ref(`/oms/clients/${clientRef}/orders`)
     .push(data)
     .then(function (resp) {
-      // console.log(resp);
+      console.log(data);
+      console.log(resp);
       orderSumitted(data, resp);
     });
 }
@@ -157,38 +158,41 @@ function orderSumitted(data, resp) {
     .find(".toAdd")
     .html(
       orderData.name +
-        "<br>" +
-        orderData.address.replace(/(?:\r\n|\r|\n)/g, "<br>") +
-        "<br>" +
-        orderData.city +
-        "<br> Pincode: " +
-        orderData.pincode +
-        "<br> Mobile: " +
-        orderData.mobile
+      "<br>" +
+      orderData.address.replace(/(?:\r\n|\r|\n)/g, "<br>") +
+      "<br>" +
+      orderData.city +
+      "<br> Pincode: " +
+      orderData.pincode +
+      "<br> Mobile: " +
+      orderData.mobile
     );
 
   $printHtml
     .find(".fromAdd")
     .html(
       (orderData.rname || profileData.cname) +
-        "<br>" +
-        (orderData.vendor === "1"
-          ? profileData.retAddress.replace(/(?:\r\n|\r|\n)/g, "<br>") + "<br>"
-          : "") +
-        "Mobile: " +
-        (orderData.rmobile || profileData.cnumber)
+      "<br>" +
+      (orderData.vendor === "1"
+        ? profileData.retAddress.replace(/(?:\r\n|\r|\n)/g, "<br>") + "<br>"
+        : "") +
+      "Mobile: " +
+      (orderData.rmobile || profileData.cnumber)
     );
+
   // console.log(orderData.rmobile, profileData.cnumber);
   $("#createOrder")[0].reset();
   $("#createOrder").addClass("hide");
   $("#printBtn").removeClass("hide");
   $("#saveBtn").removeClass("hide");
   $("#closePrintBtn").removeClass("hide");
-
   $printHtml.removeClass("hide");
-  if (!userExists) {
-    createCustomer(data);
-  }
+
+  // if (!userExists) {
+  //   createCustomer(data);
+  // }
+
+  // console.log(orderData);
 
   //Create Delhivery WayBill Number
   if (orderData.vendor === "2") {
@@ -202,15 +206,109 @@ function orderSumitted(data, resp) {
       trackingDCallback,
       resp._delegate._path.pieces_
     );
+  } else if(orderData.vendor === "4") {
+    createXpressBeesOrder(orderData, resp._delegate._path.pieces_);
   } else {
     refreshOrders();
   }
-  //_delegate._path.pieces_
 }
 
-//Call back after fetching waybill
+function createXpressBeesOrder(value, target) {
+  // console.log(value);
+  var orderObj = {
+    "id": value.ref.replace(' ', '-') + value.mobile.slice(-5),
+    "payment_method": value.cod == "1" ? "COD" : "prepaid",
+    "consigner_name": 'Sujatha one gram',
+    "consigner_phone": "8886428888",
+    "consigner_pincode": "521003",
+    "consigner_city": "Machilipatnam",
+    "consigner_state": "Andhra Pradesh",
+    "consigner_address": "Sujatha gold covering works Near chilkalapudi circle, Machilipatnam",
+    "consigner_gst_number": "",
+    "consignee_name": value.name,
+    "consignee_phone": value.mobile.replace("+91", ""),
+    "consignee_pincode": value.pincode,
+    "consignee_city": value.city,
+    "consignee_state": value.state,
+    "consignee_address": value.address.replace(/\s+/g, ' ').trim(),
+    "consignee_gst_number": "",
+    "products": [
+      {
+        "product_name": "Artificial Jewellery",
+        "product_qty": value.qty || "1",
+        "product_price": value.price || "5000",
+        "product_tax_per": "",
+        "product_sku": "SUJITEMS",
+        "product_hsn": "0"
+      }
+    ],
+    "invoice": [
+      {
+        "invoice_number": "INB002",
+        "invoice_date": value.time,
+        "ebill_number": "0",
+        "ebill_expiry_date": "0"
+      }
+    ],
+    "weight": "200",
+    "length": "10",
+    "height": "10",
+    "breadth": "10",
+    "courier_id": "3288",
+    "pickup_location": "customer",
+    "shipping_charges": "0",
+    "cod_charges": "0",
+    "discount": "0",
+    "order_amount": value.price || "5000",
+  }
+
+  // console.log(orderObj);
+
+  $.ajax({
+    type: 'POST',
+    beforeSend: function (xhr) {
+      xhr.setRequestHeader('Authorization', 'Bearer ' + Cookies.get('xpressLogin'));
+    },
+    url: 'https://ship.xpressbees.com/api/franchise/shipments',
+    data: JSON.stringify(orderObj),
+    contentType: "application/json; charset=utf-8"
+  }).done(function (resp) {
+    var data = JSON.parse(resp);
+    // console.log(data);
+    if (data.response) {
+      // console.log(data.awb_number);
+      trackingDCallback(data.awb_number, target);
+    } else {
+      alert(data.message);
+      console.log('XpressBees Order Creation Failed');
+    }
+  }).fail(function(resp){
+    console.log(resp.message);
+  })
+}
+
+//Call back after fetching delhivery waybill
+// function trackingXCallback(data, OrderDetails) {
+//   // console.log(data, OrderDetails);
+//   var trackValue = data;
+//   var orderId = OrderDetails[4];
+//   //Update Tracking number for Delhivery Order
+//   var orderRef = firebase
+//     .app()
+//     .database()
+//     .ref(`/oms/clients/${clientRef}/orders/${orderId}/fields`);
+//   orderRef
+//     .update({
+//       tracking: trackValue,
+//     })
+//     .then(function () {
+//       refreshOrders();
+//     });
+// }
+
+//Call back after fetching delhivery waybill
 function trackingDCallback(data, OrderDetails) {
-  // console.log(data, OrderDetails);
+  // console.log(OrderDetails);
   var trackValue = data;
   var orderId = OrderDetails[4];
   //Update Tracking number for Delhivery Order
@@ -265,7 +363,7 @@ function refreshOldOrders() {
 function fetchOrders(div) {
   $loading.show();
   var orderRef = `/oms/clients/${clientRef}/orders`;
-  if(div == 'oldOrdersexample') {
+  if (div == 'oldOrdersexample') {
     orderRef = `/oms/clients/${clientRef}/oldOrders`;
   }
   firebase
@@ -286,7 +384,7 @@ function fetchOrders(div) {
 function deleteOldOrders() {
   $loading.show();
   var orderRef = `/oms/clients/${clientRef}/orders`;
- 
+
   firebase
     .app()
     .database()
@@ -294,33 +392,33 @@ function deleteOldOrders() {
     .once("value")
     .then((snapshot) => {
       ordersData = snapshot.val();
-      
-    const today = moment();
-    const sevenDaysBefore = moment().subtract(7, 'days');
-    var parseData = [];
-    
-    $.each(ordersData, function (key, value) {
-      value.fields.key = key;
-      parseData.push(value.fields);
-    });
 
-    console.log(parseData.length);
-    parseData = parseData.filter(function (order) {
-      var date = new Date(formateDates(order.time));
-      return date < sevenDaysBefore;
-    });
-    console.log(parseData.length);
-    $.each(parseData, function (key, value) {
-      var orderKey = this.key;
-      firebase
-        .app()
-        .database()
-        .ref(orderRef+'/'+orderKey)
-        .remove();
-    });
-    console.log(parseData.length);
-    // renderOrders(div, ordersData, true);
-    $loading.hide();
+      const today = moment();
+      const sevenDaysBefore = moment().subtract(7, 'days');
+      var parseData = [];
+
+      $.each(ordersData, function (key, value) {
+        value.fields.key = key;
+        parseData.push(value.fields);
+      });
+
+      // console.log(parseData.length);
+      parseData = parseData.filter(function (order) {
+        var date = new Date(formateDates(order.time));
+        return date < sevenDaysBefore;
+      });
+      // console.log(parseData.length);
+      $.each(parseData, function (key, value) {
+        var orderKey = this.key;
+        firebase
+          .app()
+          .database()
+          .ref(orderRef + '/' + orderKey)
+          .remove();
+      });
+      // console.log(parseData.length);
+      // renderOrders(div, ordersData, true);
+      $loading.hide();
     });
 }
 
@@ -354,13 +452,13 @@ function renderOrders(div, data, isParse) {
   const today = moment();
   const sevenDaysBefore = moment().subtract(7, 'days');
 
-  if(div === 'example') {
+  if (div === 'example') {
     parseData = parseData.filter(function (order) {
       var date = new Date(formateDates(order.time));
       // console.log(date);
       return date >= sevenDaysBefore && date <= today;
     });
-  } else if(div === 'oldexample') {
+  } else if (div === 'oldexample') {
     parseData = parseData.filter(function (order) {
       var date = new Date(formateDates(order.time));
       // console.log(date);
@@ -502,6 +600,13 @@ var $loading;
 
 $(document).ready(function () {
   authCheck();
+
+  if (!Cookies.get('xpressLogin')) {
+    xpressbeeLogin();
+  } else {
+    console.log('XpreesBees Cookie exists');
+  }
+
   $loading = $(".loading");
   fetchOrders("example");
   fetchProfile();
@@ -520,6 +625,8 @@ $(document).ready(function () {
     if (obj.fields.ref == "") {
       obj.fields.ref = obj.fields.mobile.slice(-5);
     }
+    //create xpress order here
+    
     createOrder(obj);
   });
 
@@ -593,7 +700,7 @@ $(document).ready(function () {
       .from(element)
       .output("blob")
       .then(function (blob) {
-        console.log(blob);
+        // console.log(blob);
         let url = URL.createObjectURL(blob);
         window.open(url); //opens the pdf in a new tab
       });
@@ -742,7 +849,7 @@ $(document).ready(function () {
     }
   }
 
-   
+
 
   var exportData;
   // fetchTableOrders('exportOrder', 'exportTable');
@@ -870,8 +977,8 @@ $(document).ready(function () {
       $form.find("[name=state]").val(state); //.attr("readonly", "");
       $form.find("[name=country]").val(country); //.attr("readonly", "");
     }
-    
-    if(val == '2') {
+
+    if (val == '2') {
       delhiveryApis(
         "GET",
         "/c/api/pin-codes/json/",
@@ -1067,7 +1174,7 @@ $(document).ready(function () {
     $(data).each(function (index, val) {
       var orderId = val;
       var orderRef = `/oms/clients/${clientRef}/orders/${orderId}`;
-      if(tableId == 'oldOrders') {
+      if (tableId == 'oldOrders') {
         orderRef = `/oms/clients/${clientRef}/oldOrders/${orderId}`;
       }
       firebase
@@ -1078,7 +1185,7 @@ $(document).ready(function () {
       // removeByAttr(arr, 'key', orderId);
     });
     // refreshOrders();
-    if(tableId == 'oldOrders') {
+    if (tableId == 'oldOrders') {
       refreshOldOrders();
     } else {
       refreshOrders();
@@ -1101,7 +1208,7 @@ $(document).ready(function () {
             .database()
             .ref(`/oms/clients/${clientRef}/oldOrders/${orderId}`)
             .update(orderData);
-      });
+        });
     });
     // deleteOrders(data, e);
     $(e.target).removeAttr("disabled");
@@ -1111,7 +1218,7 @@ $(document).ready(function () {
   function markAsDispatched(data, e) {
     var isDone = false;
     var $target = $(e.target);
-    if($target.hasClass('is-true')) {
+    if ($target.hasClass('is-true')) {
       isDone = true;
     }
     $(data).each(function (index, val) {
@@ -1161,11 +1268,11 @@ $(document).ready(function () {
     } else if (orderData.vendor === "2") {
       // $pageBreak.append("<h1 class='logo-align center-align'><img src='suj.png'></h2><br>");
       $pageBreak.append("<h2 class='center-align'>" + "Delhivery Courier" + "</h2><br>");
-      $pageBreak.append("<h3 class='center-align'><svg class='barcode-track' data-tracking="+orderData.tracking+"></svg></h3>");
+      $pageBreak.append("<h3 class='center-align'><svg class='barcode-track' data-tracking=" + orderData.tracking + "></svg></h3>");
     } else if (orderData.vendor === "4") {
       // $pageBreak.append("<h1 class='logo-align center-align'><img src='suj.png'></h2><br>");
       $pageBreak.append("<h2 class='center-align'>" + "XpressBees Courier" + "</h2><br>");
-      $pageBreak.append("<h3 class='center-align'><svg class='barcode-track' data-tracking="+orderData.tracking+"></svg></h3>");
+      $pageBreak.append("<h3 class='center-align'><svg class='barcode-track' data-tracking=" + orderData.tracking + "></svg></h3>");
     }
     else {
       $pageBreak.append("<h2>" + "Courier" + "</h2><br>");
@@ -1177,31 +1284,31 @@ $(document).ready(function () {
       .append("<div class='toAdd'><h4>To:</h4></div>")
       .append(
         orderData.name +
-          "<br>" +
-          orderData.address.replace(/(?:\r\n|\r|\n)/g, "<br>") +
-          "<br>" +
-          orderData.city +
-          "<br> Pincode: " +
-          orderData.pincode +
-          "<br> Mobile: " +
-          orderData.mobile
+        "<br>" +
+        orderData.address.replace(/(?:\r\n|\r|\n)/g, "<br>") +
+        "<br>" +
+        orderData.city +
+        "<br> Pincode: " +
+        orderData.pincode +
+        "<br> Mobile: " +
+        orderData.mobile
       );
-    $pageBreak.append("<br><br>Ref:"+orderData.ref+"<br><br><br>");
+    $pageBreak.append("<br><br>Ref:" + orderData.ref + "<br><br><br>");
     $pageBreak
       .append("<div class='fromAdd'><h4>From:</h4></div>")
       .append(
         (orderData.rname || profileData.cname) +
-          "<br>" +
-          (orderData.vendor === "1"
-            ? profileData.retAddress.replace(/(?:\r\n|\r|\n)/g, "<br>") + "<br>"
-            : "") +
-          "Mobile: " +
-          (orderData.rmobile || profileData.cnumber)
+        "<br>" +
+        (orderData.vendor === "1"
+          ? profileData.retAddress.replace(/(?:\r\n|\r|\n)/g, "<br>") + "<br>"
+          : "") +
+        "Mobile: " +
+        (orderData.rmobile || profileData.cnumber)
       );
 
     $printHtml.append($pageBreak);
 
-    $('.barcode-track').each(function(){
+    $('.barcode-track').each(function () {
       var $this = $(this);
       var tracking = $this.attr('data-tracking');
       $this.JsBarcode(tracking);
@@ -1467,7 +1574,7 @@ function generateXL(type, data) {
         ConsigneeState: value.state,
         ConsigneePincode: value.pincode,
         ConsigneeGST: '',
-        CourierMode:  'Surface' ,
+        CourierMode: 'Surface',
         InvoiceNumber: '',
         InvoiceDate: '',
         EBNNumber: '',
@@ -1476,21 +1583,21 @@ function generateXL(type, data) {
         Length: '10',
         Height: '10',
         Breadth: '10',
-        SKU1 : '0',
+        SKU1: '0',
         Product1: 'Artificial Jewel',
         Quantity1: value.qty || "1",
-        Price1 : value.price || "5000",
-        HSN1 : '0',
-        SKU2 : '0',
+        Price1: value.price || "5000",
+        HSN1: '0',
+        SKU2: '0',
         Product2: '0',
         Quantity2: '0',
-        Price2 : "0",
-        HSN2 : '0',
-        SKU3 : '0',
+        Price2: "0",
+        HSN2: '0',
+        SKU3: '0',
         Product5: '0',
         Quantity3: '0',
-        Price3 : '0',
-        HSN3 : '0'
+        Price3: '0',
+        HSN3: '0'
       });
     });
   } else {
@@ -1510,7 +1617,7 @@ function generateXL(type, data) {
   /* File Name */
   var filename = "Delhivery_Bulk_Order.xlsx";
 
-  if(type == '4') {
+  if (type == '4') {
     filename = "XpressBee_Bulk_Order.csv";
   }
 
@@ -1518,21 +1625,21 @@ function generateXL(type, data) {
   var ws_name = "Sheet1";
 
   if (typeof console !== "undefined") console.log(new Date());
-  
+
   var wb = XLSX.utils.book_new(),
     ws = XLSX.utils.aoa_to_sheet(createXLSLFormatObj);
 
   var csv = XLSX.utils.sheet_to_csv(ws, { strip: true });
 
   // if(type != '4') {
-    
+
   // } else {
   //   var wb = XLSX.utils.book_new(),
   //   ws = XLSX.utils.sheet_to_csv(createXLSLFormatObj);
   // }
 
 
-  if(type == '4') {
+  if (type == '4') {
     download_file(csv, filename, 'text/csv;encoding:utf-8');
   } else {
     /* Add worksheet to workbook */
@@ -1549,21 +1656,21 @@ function download_file(content, fileName, mimeType) {
   mimeType = mimeType || 'application/octet-stream';
 
   if (navigator.msSaveBlob) { // IE10
-      navigator.msSaveBlob(new Blob([content], {
-          type: mimeType
-      }), fileName);
+    navigator.msSaveBlob(new Blob([content], {
+      type: mimeType
+    }), fileName);
   } else if (URL && 'download' in a) { //html5 A[download]
-      a.href = URL.createObjectURL(new Blob([content], {
-          type: mimeType
-      }));
-      a.setAttribute('download', fileName);
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+    a.href = URL.createObjectURL(new Blob([content], {
+      type: mimeType
+    }));
+    a.setAttribute('download', fileName);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   } else {
-      location.href = 'data:application/octet-stream,' + encodeURIComponent(content); // only this mime type is supported
+    location.href = 'data:application/octet-stream,' + encodeURIComponent(content); // only this mime type is supported
   }
-}  
+}
 
 
 function delhiveryApis(method, service, data, callback, target) {
@@ -1608,4 +1715,50 @@ function pincodeCallback(data, target) {
       .addClass("success")
       .text("Servicable Pincode");
   }
+}
+
+var xpressCred = {
+  username: "xb5488666757",
+  password: "Sujatha@123"
+};
+
+function xpressbeeLogin() {
+  $.ajax({
+    type: 'POST',
+    url: 'https://ship.xpressbees.com/api/users/franchise_user_login',
+    data: JSON.stringify(xpressCred),
+    contentType: "application/json; charset=utf-8"
+  }).done(function (data) {
+    if (data.status) {
+      createXpressCookie(data.data);
+    } else {
+      console.log('XpressBees Login Failed');
+    }
+  });
+}
+
+function createXpressCookie(cookie) {
+  // console.log(cookie);
+  Cookies.set('xpressLogin', cookie);
+
+  // $('.vendorOption').find('option[value="4"]').removeAttr('disabled');
+
+  // $.ajax({
+  //   type: 'GET',
+  //   beforeSend: function (xhr) {
+  //     xhr.setRequestHeader('Authorization', 'Bearer ' + Cookies.get('xpressLogin'));
+  //   },
+  //   url: ' https://ship.xpressbees.com/api/franchise/shipments/courier',
+  //   // data: JSON.stringify(orderObj),
+  //   contentType: "application/json; charset=utf-8"
+  // }).done(function (data) {
+  //   if (data.response) {
+  //     console.log(data.awb_number);
+  //     // trackingDCallback(data.awb_number, value);
+  //   } else {
+  //     console.log('XpressBees Order Creation Failed');
+  //   }
+  // }).fail(function(resp){
+  //   console.log(resp.message);
+  // })
 }

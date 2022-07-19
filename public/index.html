@@ -181,7 +181,7 @@
                     
                     <div class="mb-3 col-4">
                         <label class="form-label">Courier Service <span class="error">*</span></label>
-                        <select required name="vendor" class="form-select" aria-label="Default select example">
+                        <select required name="vendor" class="form-select vendorOption" aria-label="Default select example">
                             <option value="1">India Post</option>
                             <option value="2" selected>Delhivery</option>
                             <option value="3">DTDC</option>
@@ -441,6 +441,8 @@
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script type="text/javascript" src="//unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.18.9/package/dist/xlsx.zahl.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
 
     <!-- Insert these scripts at the bottom of the HTML, but before you use any Firebase services -->
     <script src="html2pdf.bundle.js"></script>
