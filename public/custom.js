@@ -1275,16 +1275,19 @@ $(document).ready(function () {
   function generatePdf(data, index) {
     var orderData = data;
     var $pageBreak = $('<div class="html2pdf__page-break">');
+    var payment = orderData.cod == "1" ? "COD" : "PREPAID/PAID"
 
     if (orderData.vendor === "1") {
       $pageBreak.append("<h2>" + "Registered Parcel" + "</h2><br>");
     } else if (orderData.vendor === "2") {
       // $pageBreak.append("<h1 class='logo-align center-align'><img src='suj.png'></h2><br>");
       $pageBreak.append("<h2 class='center-align'>" + "Delhivery Courier" + "</h2><br>");
+      $pageBreak.append("<h3 class='center-align'>" + payment + (orderData.codprice || '') + "</h3><br>");
       $pageBreak.append("<h3 class='center-align'><svg class='barcode-track' data-tracking=" + orderData.tracking + "></svg></h3>");
     } else if (orderData.vendor === "4") {
       // $pageBreak.append("<h1 class='logo-align center-align'><img src='suj.png'></h2><br>");
       $pageBreak.append("<h2 class='center-align'>" + "XpressBees Courier" + "</h2><br>");
+      $pageBreak.append("<h3 class='center-align'>" + payment + (orderData.cod == "1" ? ": Rs." : "") + ((orderData.codprice + "/-") || '') + "</h3><br>");
       $pageBreak.append("<h3 class='center-align'><svg class='barcode-track' data-tracking=" + orderData.tracking + "></svg></h3>");
     }
     else {
