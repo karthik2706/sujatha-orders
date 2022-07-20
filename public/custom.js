@@ -601,10 +601,17 @@ var $loading;
 $(document).ready(function () {
   authCheck();
 
-  if (!Cookies.get('xpressLogin')) {
-    xpressbeeLogin();
+  var page = window.page;
+  console.log(page);
+
+  if(page.indexOf('tracking.html') > -1) {
+    console.log('Tracking Page');
   } else {
-    console.log('XpreesBees Cookie exists');
+    if (!Cookies.get('xpressLogin')) {
+      xpressbeeLogin();
+    } else {
+      console.log('XpreesBees Cookie exists');
+    }
   }
 
   $loading = $(".loading");
@@ -1344,7 +1351,7 @@ $(document).ready(function () {
     var mobile = $form.find("[name=mobile");
     var message = $form.find(".mobileMessage");
     $form.find(".mobileMessage");
-    if (!mobile.val().match("[0-9]{10}")) {
+    if (!mobile.val().match("[0-9]{10}") && message) {
       // console.log("Please put 10 digit mobile number");
       message.addClass("error").removeClass("hide");
       message[0].innerHTML = "Required 10 digits for mobile number";
