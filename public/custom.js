@@ -22,6 +22,9 @@ let profileData;
 
 var userExists = false;
 
+var xpressCred = {};
+
+
 //One-time use to push keys
 // function pushApiKeys() {
 //   var data = {
@@ -49,10 +52,23 @@ function fetchApiKeys() {
     .then((snapshot) => {
       var apiKeys = snapshot.val();
       var delhiveryKeys = apiKeys.delhivery[apiKeysRef];
+      var xpressbeeKeys = apiKeys.xpressbees[apiKeysRef];
       // console.  log(apiKeys);
       clientKeyD = delhiveryKeys.clientKeyD;
       urlD = delhiveryKeys.urlD;
       clientName = delhiveryKeys.clientName;
+      xpressCred.username = xpressbeeKeys.username;
+      xpressCred.password = xpressbeeKeys.password;
+
+      if(page.indexOf('tracking.html') > -1) {
+        console.log('Tracking Page');
+      } else {
+        if (!Cookies.get('xpressLogin')) {
+          xpressbeeLogin();
+        } else {
+          console.log('XpreesBees Cookie exists');
+        }
+      }
     });
 }
 
@@ -600,19 +616,9 @@ var $loading;
 
 $(document).ready(function () {
   authCheck();
-
+  
   var page = window.page;
-  console.log(page);
 
-  if(page.indexOf('tracking.html') > -1) {
-    console.log('Tracking Page');
-  } else {
-    if (!Cookies.get('xpressLogin')) {
-      xpressbeeLogin();
-    } else {
-      console.log('XpreesBees Cookie exists');
-    }
-  }
 
   $loading = $(".loading");
   fetchOrders("example");
@@ -1369,6 +1375,8 @@ window.onload = function () {
       $(".loading").addClass("hide");
     }
   }, 5000);
+
+  
 };
 
 function generateXL(type, data) {
@@ -1724,10 +1732,6 @@ function pincodeCallback(data, target) {
   }
 }
 
-var xpressCred = {
-  username: "xb5488666757",
-  password: "Sujatha@123"
-};
 
 function xpressbeeLogin() {
   $.ajax({
@@ -1746,7 +1750,20 @@ function xpressbeeLogin() {
 
 function createXpressCookie(cookie) {
   // console.log(cookie);
-  Cookies.set('xpressLogin', cookie);
+
+  var now = new Date();
+  var time = now.getTime();
+  time += 3600 * 1000;
+  now.setTime(time);
+  document.cookie =
+    'xpressLogin=' + cookie +
+    '; expires=' + now.toUTCString() +
+    '; path=/';
+
+  // var now = new Date();
+  // now.setTime(now.getTime() + 1 * 3600 * 1000);
+
+  // Cookies.set('xpressLogin', cookie, {expires : now.toUTCString()});
 
   // $('.vendorOption').find('option[value="4"]').removeAttr('disabled');
 
