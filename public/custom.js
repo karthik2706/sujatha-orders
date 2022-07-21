@@ -95,8 +95,8 @@ function createOrder(data) {
     .ref(`/oms/clients/${clientRef}/orders`)
     .push(data)
     .then(function (resp) {
-      console.log(data);
-      console.log(resp);
+      // console.log(data);
+      // console.log(resp);
       orderSumitted(data, resp);
     });
 }
@@ -223,7 +223,7 @@ function orderSumitted(data, resp) {
       resp._delegate._path.pieces_
     );
   } else if(orderData.vendor === "4") {
-    createXpressBeesOrder(orderData, resp._delegate._path.pieces_);
+    // createXpressBeesOrder(orderData, resp._delegate._path.pieces_);
   } else {
     refreshOrders();
   }
@@ -390,7 +390,7 @@ function fetchOrders(div) {
     .once("value")
     .then((snapshot) => {
       ordersData = snapshot.val();
-      // console.log(Object.keys(ordersData).length);
+      console.log(Object.keys(ordersData).length);
       renderOrders(div, ordersData, true);
       $loading.hide();
     });
@@ -413,12 +413,15 @@ function deleteOldOrders() {
       const sevenDaysBefore = moment().subtract(7, 'days');
       var parseData = [];
 
+      console.log(Object.keys(ordersData).length);
+
       $.each(ordersData, function (key, value) {
         value.fields.key = key;
         parseData.push(value.fields);
       });
 
-      // console.log(parseData.length);
+      console.log('orders length - '+parseData.length);
+
       parseData = parseData.filter(function (order) {
         var date = new Date(formateDates(order.time));
         return date < sevenDaysBefore;
@@ -432,8 +435,8 @@ function deleteOldOrders() {
           .ref(orderRef + '/' + orderKey)
           .remove();
       });
-      // console.log(parseData.length);
-      // renderOrders(div, ordersData, true);
+      console.log(parseData.length);
+      renderOrders('example', ordersData, true);
       $loading.hide();
     });
 }
@@ -465,7 +468,7 @@ function renderOrders(div, data, isParse) {
 
   // console.log(div);
 
-  const today = moment();
+  const today = new Date();
   const sevenDaysBefore = moment().subtract(7, 'days');
 
   if (div === 'example') {
@@ -1223,7 +1226,7 @@ $(document).ready(function () {
             .update(orderData);
         });
     });
-    // deleteOrders(data, e);
+    deleteOrders(data, e);
     $(e.target).removeAttr("disabled");
   }
 
