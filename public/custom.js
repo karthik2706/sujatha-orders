@@ -223,7 +223,7 @@ function orderSumitted(data, resp) {
       resp._delegate._path.pieces_
     );
   } else if(orderData.vendor === "4") {
-    // createXpressBeesOrder(orderData, resp._delegate._path.pieces_);
+    createXpressBeesOrder(orderData, resp._delegate._path.pieces_);
   } else {
     refreshOrders();
   }
@@ -410,7 +410,7 @@ function deleteOldOrders() {
       ordersData = snapshot.val();
 
       const today = moment();
-      const sevenDaysBefore = moment().subtract(7, 'days');
+      const sevenDaysBefore = moment().subtract(5, 'days');
       var parseData = [];
 
       console.log(Object.keys(ordersData).length);
@@ -469,7 +469,7 @@ function renderOrders(div, data, isParse) {
   // console.log(div);
 
   const today = new Date();
-  const sevenDaysBefore = moment().subtract(7, 'days');
+  const sevenDaysBefore = moment().subtract(5, 'days');
 
   if (div === 'example') {
     parseData = parseData.filter(function (order) {
@@ -1650,7 +1650,7 @@ function generateXL(type, data) {
   var wb = XLSX.utils.book_new(),
     ws = XLSX.utils.aoa_to_sheet(createXLSLFormatObj);
 
-  var csv = XLSX.utils.sheet_to_csv(ws, { strip: true });
+   var csv = XLSX.utils.sheet_to_csv(ws, { strip: true });
 
   // if(type != '4') {
 
