@@ -44,10 +44,12 @@ var xpressCred = {};
 
 //Fetch API keys
 function fetchApiKeys() {
-  firebase
-    .app()
-    .database()
-    .ref(`/oms/clients/${clientRef}/apiKeys`)
+  var apiKeys = firebase
+  .app()
+  .database()
+  .ref(`/oms/clients/${clientRef}/apiKeys`);
+  
+  apiKeys
     .once("value")
     .then((snapshot) => {
       var apiKeys = snapshot.val();
@@ -95,8 +97,6 @@ function createOrder(data) {
     .ref(`/oms/clients/${clientRef}/orders`)
     .push(data)
     .then(function (resp) {
-      // console.log(data);
-      // console.log(resp);
       orderSumitted(data, resp);
     });
 }
@@ -109,7 +109,6 @@ function updateProfile(data) {
     .ref(`/oms/clients/${clientRef}/profile/${profileRef}`)
     .update(data)
     .then(function () {
-      // console.log("profile data posted");
       $loading.hide();
     });
 }
@@ -127,6 +126,7 @@ function createCustomer(data) {
     email: data.email,
     isReseller: false,
   };
+
   var obj = { user: user };
 
   firebase
@@ -140,10 +140,12 @@ function createCustomer(data) {
 }
 
 function fetchProfile() {
-  firebase
-    .app()
-    .database()
-    .ref(`/oms/clients/${clientRef}/profile/${profileRef}`)
+  var profile = firebase
+  .app()
+  .database()
+  .ref(`/oms/clients/${clientRef}/profile/${profileRef}`);
+  
+  profile
     .once("value")
     .then((snapshot) => {
       profileData = snapshot.val().fields;
@@ -347,9 +349,9 @@ $("#orders-tab").click(function () {
 });
 
 //Click on Order tab
-$("#myold-orders-tab").click(function () {
-  refreshMyOldOrders();
-});
+// $("#myold-orders-tab").click(function () {
+//   refreshMyOldOrders();
+// });
 
 //Refresh Orders
 function refreshOrders() {
@@ -360,12 +362,12 @@ function refreshOrders() {
 }
 
 //Refresh Old Orders
-function refreshMyOldOrders() {
-  if ($.fn.DataTable.isDataTable("#oldexample")) {
-    $("#oldexample").dataTable().fnDestroy();
-  }
-  fetchOrders("oldexample");
-}
+// function refreshMyOldOrders() {
+//   if ($.fn.DataTable.isDataTable("#oldexample")) {
+//     $("#oldexample").dataTable().fnDestroy();
+//   }
+//   fetchOrders("oldexample");
+// }
 
 //Refresh Old Orders
 function refreshOldOrders() {
@@ -379,18 +381,17 @@ function refreshOldOrders() {
 function fetchOrders(div) {
   $loading.show();
   var orderRef = `/oms/clients/${clientRef}/orders`;
-  if (div == 'oldOrdersexample') {
-    orderRef = `/oms/clients/${clientRef}/oldOrders`;
-  }
-  firebase
-    .app()
-    .database()
-    .ref(orderRef)
-    // .limitToFirst(500)
+  var orders = firebase
+  .app()
+  .database()
+  .ref(orderRef);
+  
+    orders
     .once("value")
     .then((snapshot) => {
       ordersData = snapshot.val();
-      console.log(Object.keys(ordersData).length);
+      window.orderData = snapshot.val();
+      // console.log(Object.keys(ordersData).length);
       renderOrders(div, ordersData, true);
       $loading.hide();
     });
@@ -401,16 +402,18 @@ function deleteOldOrders() {
   $loading.show();
   var orderRef = `/oms/clients/${clientRef}/orders`;
 
-  firebase
-    .app()
-    .database()
-    .ref(orderRef)
+  var orders = firebase
+  .app()
+  .database()
+  .ref(orderRef);
+  
+  orders
     .once("value")
     .then((snapshot) => {
       ordersData = snapshot.val();
 
       const today = moment();
-      const sevenDaysBefore = moment().subtract(5, 'days');
+      const sevenDaysBefore = moment().subtract(7, 'days');
       var parseData = [];
 
       console.log(Object.keys(ordersData).length);
@@ -770,6 +773,7 @@ $(document).ready(function () {
 
     orderRef.once("value").then((snapshot) => {
       var orderData = snapshot.val();
+      // window.orderData = snapshot.val();
 
       // console.log(orderData);
       $("#updateOrder")
@@ -893,6 +897,7 @@ $(document).ready(function () {
     fetchTableOrders(this, "deleteOrdersTable");
   });
 
+  //Export orders table
   function fetchTableOrders(order, table) {
     var filters = {};
     $(order)
@@ -901,48 +906,54 @@ $(document).ready(function () {
       .each(function () {
         filters[this.name] = $(this).val();
       });
-
-    firebase
+      
+      var orders = firebase
       .app()
       .database()
-      .ref(`/oms/clients/${clientRef}/orders`)
+      .ref(`/oms/clients/${clientRef}/orders`);
+
+      orders
       .once("value")
       .then((snapshot) => {
         ordersData = snapshot.val();
-
-        let parseData = [];
-        $.each(ordersData, function (key, value) {
-          value.fields.key = key;
-          parseData.push(value.fields);
-        });
-
-        var filteredOrders = parseData.filter(function (order) {
-          return order.vendor == filters.vendor && !order.isDispatched;
-        });
-
-        var startDate = new Date(formateDate(filters.fromdatepicker));
-        var endDate;
-
-        if (formateDate(filters.todatepicker) == "null") {
-          endDate = new Date(formateDate(filters.fromdatepicker));
-        } else {
-          endDate = new Date(formateDate(filters.todatepicker));
-        }
-
-        var resultProductData = filteredOrders.filter(function (order) {
-          var date = new Date(formateDate(order.time));
-          return date >= startDate && date <= endDate;
-        });
-
-        if ($.fn.DataTable.isDataTable("#" + table)) {
-          $("#" + table)
-            .dataTable()
-            .fnDestroy();
-        }
-
-        exportData = resultProductData;
-        renderOrders(table, resultProductData, false);
+        fetchOrderFunc(ordersData, table, filters);
       });
+  }
+
+  //Export orders inner function
+  function fetchOrderFunc(ordersData, table, filters) {
+    let parseData = [];
+    $.each(ordersData, function (key, value) {
+      value.fields.key = key;
+      parseData.push(value.fields);
+    });
+
+    var filteredOrders = parseData.filter(function (order) {
+      return order.vendor == filters.vendor && !order.isDispatched;
+    });
+
+    var startDate = new Date(formateDate(filters.fromdatepicker));
+    var endDate;
+
+    if (formateDate(filters.todatepicker) == "null") {
+      endDate = new Date(formateDate(filters.fromdatepicker));
+    } else {
+      endDate = new Date(formateDate(filters.todatepicker));
+    }
+
+    var resultProductData = filteredOrders.filter(function (order) {
+      var date = new Date(formateDate(order.time));
+      return date >= startDate && date <= endDate;
+    });
+
+    if ($.fn.DataTable.isDataTable("#" + table)) {
+      $("#" + table)
+        .dataTable()
+        .fnDestroy();
+    }
+
+    exportData = resultProductData;
+    renderOrders(table, resultProductData, false);
   }
 
   $(".bulkBtn").click(function (e) {
@@ -1024,52 +1035,19 @@ $(document).ready(function () {
 
   });
 
-  //Phone number fetch
-  $("#createOrder").on("blur", "[name=mobile]", function () {
-    var mobile = $(this).val();
-    var mobileData = [];
-    //Populate user details
-    // firebase
-    //   .app()
-    //   .database()
-    //   .ref(`/oms/clients/${clientRef}/customers`)
-    //   .once("value")
-    //   .then((snapshot) => {
-    //     customersData = snapshot.val();
-    //     $.each(customersData, function (key, value) {
-    //       mobileData.push(value.user);
-    //     });
-
-    //     var obj = mobileData.filter(function (key) {
-    //       return key.mobile == mobile;
-    //     });
-
-    //     if (!obj.length) return;
-
-    //     $("#createOrder")
-    //       .find(":input:visible")
-    //       .not("select")
-    //       .each(function () {
-    //         var $this = $(this);
-    //         var name = $this.attr("name");
-    //         if (obj) {
-    //           $this.val(obj[0][name] || "");
-    //         }
-    //       });
-    //     userExists = true;
-    //   });
-  });
-
   //Tracking Code
   var $trackingForm = $("#tracking");
   $(".findOrders").click(function (e) {
     e.preventDefault();
     var mobile = $trackingForm.find("[name=mobile]").val();
     $("#orderResults").removeClass("hide");
-    firebase
-      .app()
-      .database()
-      .ref(`/oms/clients/${clientRef}/orders`)
+
+    var orders = firebase
+    .app()
+    .database()
+    .ref(`/oms/clients/${clientRef}/orders`);
+
+    orders
       .once("value")
       .then((snapshot) => {
         ordersData = snapshot.val();
@@ -1200,34 +1178,37 @@ $(document).ready(function () {
       printSlips(selectedRows, e);
     } else if ($this.hasClass("deleteOrders")) {
       deleteOrders(selectedRows, e);
-    } else if ($this.hasClass("move-to-old")) {
-      moveToOldOrders(selectedRows, e);
-    } else if ($this.hasClass("xpressStatus")) {
+    } 
+    // else if ($this.hasClass("move-to-old")) {
+    //   moveToOldOrders(selectedRows, e);
+    // } 
+    else if ($this.hasClass("xpressStatus")) {
       checkXpressBeesStatus(rowLis, e);
-    } else if ($this.hasClass("fetchData")) {
-      fetchStatus(selectedRows, e);
-    }
+    } 
+    // else if ($this.hasClass("fetchData")) {
+    //   fetchStatus(selectedRows, e);
+    // }
   });
 
-  function fetchStatus(data, e) {
-    var tableId = $(e.target).closest('.tab-pane').attr('id');
-    $(data).each(function (index, val) {
-      var orderId = val;
-      var orderRef = `/oms/clients/${clientRef}/orders/${orderId}`;
-      firebase
-        .app()
-        .database()
-        .ref(orderRef)
-        .once("value")
-        .then((snapshot) => {
-          ordersData = snapshot.val();
-          console.log(ordersData);
-        });
-    });
+  // function fetchStatus(data, e) {
+  //   var tableId = $(e.target).closest('.tab-pane').attr('id');
+  //   $(data).each(function (index, val) {
+  //     var orderId = val;
+  //     var orderRef = `/oms/clients/${clientRef}/orders/${orderId}`;
+  //     firebase
+  //       .app()
+  //       .database()
+  //       .ref(orderRef)
+  //       .once("value")
+  //       .then((snapshot) => {
+  //         ordersData = snapshot.val();
+  //         console.log(ordersData);
+  //       });
+  //   });
 
-    $(e.target).removeAttr("disabled");
+  //   $(e.target).removeAttr("disabled");
 
-  }
+  // }
 
   //CheckXpress
   function checkXpressBeesStatus(data, e) {
@@ -1343,25 +1324,25 @@ $(document).ready(function () {
   }
 
   //Move to Old Orders
-  function moveToOldOrders(data, e) {
-    $(data).each(function (index, val) {
-      var orderId = val;
-      firebase
-        .app()
-        .database()
-        .ref(`/oms/clients/${clientRef}/orders/${orderId}`)
-        .once("value").then((snapshot) => {
-          var orderData = snapshot.val();
-          firebase
-            .app()
-            .database()
-            .ref(`/oms/clients/${clientRef}/oldOrders/${orderId}`)
-            .update(orderData);
-        });
-    });
-    deleteOrders(data, e);
-    $(e.target).removeAttr("disabled");
-  }
+  // function moveToOldOrders(data, e) {
+  //   $(data).each(function (index, val) {
+  //     var orderId = val;
+  //     firebase
+  //       .app()
+  //       .database()
+  //       .ref(`/oms/clients/${clientRef}/orders/${orderId}`)
+  //       .once("value").then((snapshot) => {
+  //         var orderData = snapshot.val();
+  //         firebase
+  //           .app()
+  //           .database()
+  //           .ref(`/oms/clients/${clientRef}/oldOrders/${orderId}`)
+  //           .update(orderData);
+  //       });
+  //   });
+  //   deleteOrders(data, e);
+  //   $(e.target).removeAttr("disabled");
+  // }
 
   //Mark as dispatched
   function markAsDispatched(data, e) {
@@ -1385,6 +1366,7 @@ $(document).ready(function () {
   }
 
   var countSlips;
+  
   //Print Slips
   function printSlips(data, e) {
     countSlips = data.length;
@@ -1393,15 +1375,21 @@ $(document).ready(function () {
 
     $(data).each(function (index, val) {
       var orderId = val;
-      var orderRef = firebase
+      var orderData;
+      if(window.orderData[orderId]) {
+        orderData = window.orderData[orderId].fields;
+      } else {
+        var orderRef = firebase
         .app()
         .database()
         .ref(`/oms/clients/${clientRef}/orders/${orderId}/fields`);
 
-      orderRef.once("value").then((snapshot) => {
-        var orderData = snapshot.val();
-        generatePdf(orderData, index);
-      });
+        orderRef.once("value").then((snapshot) => {
+          orderData = snapshot.val();
+        });
+      }
+      // console.log(orderData)
+      generatePdf(orderData, index);
     });
 
     $(e.target).removeAttr("disabled");
@@ -1409,6 +1397,9 @@ $(document).ready(function () {
 
   //generate PDF
   function generatePdf(data, index) {
+    if(!data)  {
+      return;
+    }
     var orderData = data;
     var $pageBreak = $('<div class="html2pdf__page-break">');
     var payment = orderData.cod == "1" ? "COD" : "PREPAID/PAID"
