@@ -543,10 +543,11 @@ function renderOrders(div, data, isParse) {
       { title: "Mobile", data: "mobile" },
       { title: "Reference", data: "ref" },
       { title: "Pincode", data: "pincode" },
-      { title: "Reseller", data: "rname", width: "15%" },
+      { title: "Reseller", data: "rname", width: "5%" },
       {
         title: "Courier",
         data: "vendor",
+        className: "vendorClass",
         render: function (data) {
           var courier = "";
           switch (data) {
@@ -569,6 +570,17 @@ function renderOrders(div, data, isParse) {
       {
         title: "Tracking ID",
         data: "tracking",
+        className: "trackingClass",
+      },
+      { title: "Order Status", width: "15%", data: "orderStatus",
+        className: "statusClass",
+        render: function (data) {
+          var orderStatus = "Unknown";
+          if(data) {
+            orderStatus = data;
+          }
+          return orderStatus;
+        }
       },
     ],
   });
@@ -1164,14 +1176,22 @@ $(document).ready(function () {
     var table = $("#example");
     var rows = table.find("tbody tr");
     var selectedRows = [];
+    var rowLis = [];
     rows.each(function () {
       var row = $(this);
+      var rowObj = {
+        id: row.attr("data-bs-id"),
+        vendor: row.find('.vendorClass').text(),
+        tracking: row.find('.trackingClass').text()
+      };
       var checkbox = row.find(".checkOrder");
       var disp = checkbox.is(":checked");
       if (disp) {
         selectedRows.push(row.attr("data-bs-id"));
+        rowLis.push(rowObj);
       }
     });
+    console.log(rowLis);
     $(e.target).attr("disabled", "disabled");
     if ($this.hasClass("dispatched")) {
       markAsDispatched(selectedRows, e);
@@ -1181,8 +1201,94 @@ $(document).ready(function () {
       deleteOrders(selectedRows, e);
     } else if ($this.hasClass("move-to-old")) {
       moveToOldOrders(selectedRows, e);
+    } else if ($this.hasClass("xpressStatus")) {
+      checkXpressBeesStatus(rowLis, e);
+    } else if ($this.hasClass("fetchData")) {
+      fetchStatus(selectedRows, e);
     }
   });
+
+  function fetchStatus(data, e) {
+    var tableId = $(e.target).closest('.tab-pane').attr('id');
+    $(data).each(function (index, val) {
+      var orderId = val;
+      var orderRef = `/oms/clients/${clientRef}/orders/${orderId}`;
+      firebase
+      .app()
+      .database()
+      .ref(orderRef)
+      .once("value")
+      .then((snapshot) => {
+        ordersData = snapshot.val();
+        console.log(ordersData);
+      });
+    });
+
+    $(e.target).removeAttr("disabled");
+
+  }
+
+  //CheckXpress
+  function checkXpressBeesStatus(data, e) {
+    var tableId = $(e.target).closest('.tab-pane').attr('id');
+    
+    $(data).each(function () {
+      // console.log(this);
+      var orderId = this.id;
+      var vendor = this.vendor;
+      var tracking = this.tracking;
+      var orderRef = `/oms/clients/${clientRef}/orders/${orderId}/fields/`;
+
+      if(vendor === 'Xpressbees') {
+        $.ajax({
+          type: 'POST',
+          beforeSend: function (xhr) {
+            xhr.setRequestHeader('Authorization', 'Bearer ' + Cookies.get('xpressLogin'));
+          },
+          url: 'https://ship.xpressbees.com/api/franchise/shipments/track_shipment',
+          data: JSON.stringify({
+            "awb_number": tracking
+          }),
+          contentType: "application/json; charset=utf-8"
+        }).done(function (resp) {
+          console.log(resp);
+          var data = resp["tracking_data"];
+          var msgStatus = "";
+          if(!data) {
+            // console.log(resp.message);
+            var msg = resp.message.split('current status:');
+            var disp = msg[1].trim();
+            firebase
+              .app()
+              .database()
+              .ref(orderRef)
+              .update({
+                orderStatus: disp
+              });
+            return;
+          }
+          if(data["in transit"]) {
+            console.log(data["in transit"][0].ship_status);
+            msgStatus = data["in transit"][0].ship_status;
+          } else if (data["pending pickup"]) {
+            console.log(data["pending pickup"][0].ship_status);
+            msgStatus = data["pending pickup"][0].ship_status;
+          }
+          firebase
+              .app()
+              .database()
+              .ref(orderRef)
+              .update({
+                orderStatus: msgStatus
+              });
+        }).fail(function(resp){
+          console.log(resp.message);
+        })
+      }
+    });
+    refreshOrders(tableId);
+    $(e.target).removeAttr("disabled");
+  }
 
   //Mark as dispatched
   function deleteOrders(data, e) {
