@@ -60,7 +60,7 @@ function fetchApiKeys() {
       xpressCred.username = xpressbeeKeys.username;
       xpressCred.password = xpressbeeKeys.password;
 
-      if(page.indexOf('tracking.html') > -1) {
+      if (page.indexOf('tracking.html') > -1) {
         console.log('Tracking Page');
       } else {
         if (!Cookies.get('xpressLogin')) {
@@ -222,7 +222,7 @@ function orderSumitted(data, resp) {
       trackingDCallback,
       resp._delegate._path.pieces_
     );
-  } else if(orderData.vendor === "4") {
+  } else if (orderData.vendor === "4") {
     createXpressBeesOrder(orderData, resp._delegate._path.pieces_);
   } else {
     refreshOrders();
@@ -298,7 +298,7 @@ function createXpressBeesOrder(value, target) {
       alert(data.message);
       console.log('XpressBees Order Creation Failed');
     }
-  }).fail(function(resp){
+  }).fail(function (resp) {
     console.log(resp.message);
   })
 }
@@ -420,7 +420,7 @@ function deleteOldOrders() {
         parseData.push(value.fields);
       });
 
-      console.log('orders length - '+parseData.length);
+      console.log('orders length - ' + parseData.length);
 
       parseData = parseData.filter(function (order) {
         var date = new Date(formateDates(order.time));
@@ -572,11 +572,12 @@ function renderOrders(div, data, isParse) {
         data: "tracking",
         className: "trackingClass",
       },
-      { title: "Order Status", width: "15%", data: "orderStatus",
+      {
+        title: "Order Status", width: "15%", data: "orderStatus",
         className: "statusClass",
         render: function (data) {
           var orderStatus = "Unknown";
-          if(data) {
+          if (data) {
             orderStatus = data;
           }
           return orderStatus;
@@ -631,7 +632,7 @@ var $loading;
 
 $(document).ready(function () {
   authCheck();
-  
+
   var page = window.page;
 
 
@@ -654,7 +655,7 @@ $(document).ready(function () {
       obj.fields.ref = obj.fields.mobile.slice(-5);
     }
     //create xpress order here
-    
+
     createOrder(obj);
   });
 
@@ -1214,14 +1215,14 @@ $(document).ready(function () {
       var orderId = val;
       var orderRef = `/oms/clients/${clientRef}/orders/${orderId}`;
       firebase
-      .app()
-      .database()
-      .ref(orderRef)
-      .once("value")
-      .then((snapshot) => {
-        ordersData = snapshot.val();
-        console.log(ordersData);
-      });
+        .app()
+        .database()
+        .ref(orderRef)
+        .once("value")
+        .then((snapshot) => {
+          ordersData = snapshot.val();
+          console.log(ordersData);
+        });
     });
 
     $(e.target).removeAttr("disabled");
@@ -1231,7 +1232,7 @@ $(document).ready(function () {
   //CheckXpress
   function checkXpressBeesStatus(data, e) {
     var tableId = $(e.target).closest('.tab-pane').attr('id');
-    
+
     $(data).each(function () {
       // console.log(this);
       var orderId = this.id;
@@ -1239,7 +1240,7 @@ $(document).ready(function () {
       var tracking = this.tracking;
       var orderRef = `/oms/clients/${clientRef}/orders/${orderId}/fields/`;
 
-      if(vendor === 'Xpressbees') {
+      if (vendor === 'Xpressbees') {
         $.ajax({
           type: 'POST',
           beforeSend: function (xhr) {
@@ -1251,10 +1252,10 @@ $(document).ready(function () {
           }),
           contentType: "application/json; charset=utf-8"
         }).done(function (resp) {
-          console.log(resp);
+          // console.log(resp);
           var data = resp["tracking_data"];
           var msgStatus = "";
-          if(!data) {
+          if (!data) {
             // console.log(resp.message);
             var msg = resp.message.split('current status:');
             var disp = msg[1].trim();
@@ -1267,7 +1268,7 @@ $(document).ready(function () {
               });
             return;
           }
-          if(data["in transit"]) {
+          if (data["in transit"]) {
             console.log(data["in transit"][0].ship_status);
             msgStatus = data["in transit"][0].ship_status;
           } else if (data["pending pickup"]) {
@@ -1275,18 +1276,44 @@ $(document).ready(function () {
             msgStatus = data["pending pickup"][0].ship_status;
           }
           firebase
+            .app()
+            .database()
+            .ref(orderRef)
+            .update({
+              orderStatus: msgStatus
+            });
+        }).fail(function (resp) {
+          console.log(resp.message);
+        })
+      } else if (vendor === 'Delhivery') {
+        $.ajax({
+          url: 'https://track.delhivery.com/api/v1/packages/json/?token=' + clientKeyD + '&waybill=' + tracking,
+          dataType: 'jsonp',
+          success: function (resp) {
+            if(resp.Error) {
+              firebase
               .app()
               .database()
               .ref(orderRef)
               .update({
-                orderStatus: msgStatus
+                orderStatus: resp.Error
               });
-        }).fail(function(resp){
-          console.log(resp.message);
-        })
+            } else {
+              var data = resp.ShipmentData[0];
+              var status = data.Shipment.Status.Status;
+              firebase
+              .app()
+              .database()
+              .ref(orderRef)
+              .update({
+                orderStatus: status
+              });
+            }
+          }
+        });
       }
     });
-    refreshOrders(tableId);
+    // refreshOrders(tableId);
     $(e.target).removeAttr("disabled");
   }
 
@@ -1488,7 +1515,7 @@ window.onload = function () {
     }
   }, 5000);
 
-  
+
 };
 
 function generateXL(type, data) {
@@ -1756,7 +1783,7 @@ function generateXL(type, data) {
   var wb = XLSX.utils.book_new(),
     ws = XLSX.utils.aoa_to_sheet(createXLSLFormatObj);
 
-   var csv = XLSX.utils.sheet_to_csv(ws, { strip: true });
+  var csv = XLSX.utils.sheet_to_csv(ws, { strip: true });
 
   // if(type != '4') {
 
