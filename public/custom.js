@@ -1153,6 +1153,9 @@ $(document).ready(function () {
     e.preventDefault();
     var $this = $(this);
     var table = $("#example");
+    if($this.hasClass('exportAction')) {
+      table = $('#exportTable');
+    }
     var rows = table.find("tbody tr");
     var selectedRows = [];
     var rowLis = [];
@@ -1213,7 +1216,7 @@ $(document).ready(function () {
   //CheckXpress
   function checkXpressBeesStatus(data, e) {
     var tableId = $(e.target).closest('.tab-pane').attr('id');
-
+    console.log(tableId);
     $(data).each(function () {
       // console.log(this);
       var orderId = this.id;
