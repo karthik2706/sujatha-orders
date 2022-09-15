@@ -1437,17 +1437,21 @@ $(document).ready(function () {
         orderData.mobile
       );
     $pageBreak.append("<br><br>Ref:" + orderData.ref + "<br><br><br>");
-    // $pageBreak
-    //   .append("<div class='fromAdd'><h4>From:</h4></div>")
-    //   .append(
-    //     (orderData.rname || profileData.cname) +
-    //     "<br>" +
-    //     (orderData.vendor === "1"
-    //       ? profileData.retAddress.replace(/(?:\r\n|\r|\n)/g, "<br>") + "<br>"
-    //       : "") +
-    //     "Mobile: " +
-    //     (orderData.rmobile || profileData.cnumber)
-    //   );
+
+    if (orderData.vendor === "1") {
+      $pageBreak
+      .append("<div class='fromAdd'><h4>From:</h4></div>")
+      .append(
+        (orderData.rname || profileData.cname) +
+        "<br>" +
+        (orderData.vendor === "1"
+          ? profileData.retAddress.replace(/(?:\r\n|\r|\n)/g, "<br>") + "<br>"
+          : "") +
+        "Mobile: " +
+        (orderData.rmobile || profileData.cnumber)
+      );
+    }
+    
 
     $printHtml.append($pageBreak);
 
