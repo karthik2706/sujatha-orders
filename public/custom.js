@@ -59,8 +59,8 @@ function fetchApiKeys() {
       clientKeyD = delhiveryKeys.clientKeyD;
       urlD = delhiveryKeys.urlD;
       clientName = delhiveryKeys.clientName;
-      xpressCred.username = xpressbeeKeys.username;
-      xpressCred.password = xpressbeeKeys.password;
+      xpressCred.email = xpressbeeKeys.email;
+      xpressCred.password = xpressbeeKeys.pass;
 
       if (page.indexOf('tracking.html') > -1) {
         console.log('Tracking Page');
@@ -272,7 +272,7 @@ function createXpressBeesOrder(value, target) {
     "length": "10",
     "height": "10",
     "breadth": "10",
-    "courier_id": "3288",
+    "courier_id": "10729",
     "pickup_location": "customer",
     "shipping_charges": "0",
     "cod_charges": "0",
@@ -1873,7 +1873,7 @@ function pincodeCallback(data, target) {
 function xpressbeeLogin() {
   $.ajax({
     type: 'POST',
-    url: 'https://ship.xpressbees.com/api/users/franchise_user_login',
+    url: 'https://ship.xpressbees.com/api/users/franchise_login',
     data: JSON.stringify(xpressCred),
     contentType: "application/json; charset=utf-8"
   }).done(function (data) {
