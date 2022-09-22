@@ -61,6 +61,8 @@ function fetchApiKeys() {
       clientName = delhiveryKeys.clientName;
       xpressCred.email = xpressbeeKeys.email;
       xpressCred.password = xpressbeeKeys.pass;
+      clientKeyDNew = delhiveryKeys.clientKeyDNew;
+      clientNameNew = delhiveryKeys.clientNameNew;
 
       if (page.indexOf('tracking.html') > -1) {
         console.log('Tracking Page');
@@ -220,6 +222,17 @@ function orderSumitted(data, resp) {
       {
         token: clientKeyD,
         client_name: clientName,
+      },
+      trackingDCallback,
+      resp._delegate._path.pieces_
+    );
+  } else if (orderData.vendor === "5") {
+    delhiveryApis(
+      "GET",
+      "/waybill/api/fetch/json/",
+      {
+        token: clientKeyDNew,
+        client_name: clientNameNew,
       },
       trackingDCallback,
       resp._delegate._path.pieces_
@@ -558,7 +571,7 @@ function renderOrders(div, data, isParse) {
               courier = "India Post";
               break;
             case "2":
-              courier = "Delhivery";
+              courier = "Delhivery COD";
               break;
             case "3":
               courier = "DTDC";
@@ -566,6 +579,9 @@ function renderOrders(div, data, isParse) {
             case "4":
               courier = "Xpressbees";
               break;
+            case "5":
+                courier = "Delhivery New";
+                break;
           }
           return courier;
         },
@@ -986,7 +1002,7 @@ $(document).ready(function () {
     });
     var $pickupD = $form.find("[name=pickupD]").html(options);
     var city = $form.find("[name=city]").val();
-    if (val == 2 || val == 4) {
+    if (val == 2 || val == 4 || val == 5) {
       $form.find(".hide-2").addClass("show-2");
       $pin.addClass("pinSearch");
     } else {
@@ -1018,12 +1034,12 @@ $(document).ready(function () {
       $form.find("[name=country]").val(country); //.attr("readonly", "");
     }
 
-    if (val == '2') {
+    if (val == '2' || val == '5') {
       delhiveryApis(
         "GET",
         "/c/api/pin-codes/json/",
         {
-          token: clientKeyD,
+          token: clientKeyDNew,
           filter_codes: pincode,
         },
         pincodeCallback,
@@ -1269,9 +1285,13 @@ $(document).ready(function () {
         }).fail(function (resp) {
           console.log(resp.message);
         })
-      } else if (vendor === 'Delhivery') {
+      } else if (vendor === 'Delhivery COD' || vendor === 'Delhivery New') {
+        var clientKey = clientKeyDNew;
+        if(vendor === 'Delhivery COD') {
+          clientKey = clientKeyD;
+        }
         $.ajax({
-          url: 'https://track.delhivery.com/api/v1/packages/json/?token=' + clientKeyD + '&waybill=' + tracking,
+          url: 'https://track.delhivery.com/api/v1/packages/json/?token=' + clientKey + '&waybill=' + tracking,
           dataType: 'jsonp',
           success: function (resp) {
             if(resp.Error) {
@@ -1411,13 +1431,19 @@ $(document).ready(function () {
       $pageBreak.append("<h2>" + "Registered Parcel" + "</h2><br>");
     } else if (orderData.vendor === "2") {
       // $pageBreak.append("<h1 class='logo-align center-align'><img src='suj.png'></h2><br>");
-      $pageBreak.append("<h2 class='center-align'>" + "Delhivery Courier" + "</h2><br>");
+      $pageBreak.append("<h2 class='center-align'>" + "Delhivery Courier" + "</h2>");
+      $pageBreak.append("<p class='center-align'>" + "(old account)" + "</p><br>");
       $pageBreak.append("<h3 class='center-align'>" + payment + (orderData.codprice || '') + "</h3><br>");
       $pageBreak.append("<h3 class='center-align'><svg class='barcode-track' data-tracking=" + orderData.tracking + "></svg></h3>");
     } else if (orderData.vendor === "4") {
       // $pageBreak.append("<h1 class='logo-align center-align'><img src='suj.png'></h2><br>");
       $pageBreak.append("<h2 class='center-align'>" + "XpressBees Courier" + "</h2><br>");
       $pageBreak.append("<h3 class='center-align'>" + payment + (orderData.cod == "1" ? ": Rs." : "") + ((orderData.codprice + "/-") || '') + "</h3><br>");
+      $pageBreak.append("<h3 class='center-align'><svg class='barcode-track' data-tracking=" + orderData.tracking + "></svg></h3>");
+    } else if (orderData.vendor === "5") {
+      $pageBreak.append("<h2 class='center-align'>" + "Delhivery Courier" + "</h2>");
+      $pageBreak.append("<p class='center-align'>" + "(new account)" + "</p><br>");
+      $pageBreak.append("<h3 class='center-align'>" + payment + (orderData.codprice || '') + "</h3><br>");
       $pageBreak.append("<h3 class='center-align'><svg class='barcode-track' data-tracking=" + orderData.tracking + "></svg></h3>");
     }
     else {
