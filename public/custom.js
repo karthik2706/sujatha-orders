@@ -1606,7 +1606,7 @@ function generateXL(type, data) {
         ContentType: "",
       });
     });
-  } else if (type == "2") {
+  } else if (type == "2" || type == "5") {
     /* XLS Head Columns */
     xlsHeader = [
       "Waybill",
@@ -1683,7 +1683,7 @@ function generateXL(type, data) {
         SellerGSTTIN: "",
         HSNCode: "",
         ReturnReason: "",
-        VendorPickupLocation: value.pickupD,
+        VendorPickupLocation: (type == '2') ? value.pickupD : "Sujatha Fashion Jewellery",
         EWBN: "",
       });
     });
@@ -1793,7 +1793,11 @@ function generateXL(type, data) {
   });
 
   /* File Name */
-  var filename = "Delhivery_Bulk_Order.xlsx";
+  var filename = "Delhivery_COD_Bulk_Order.xlsx";
+
+  if (type == '5') {
+    filename = "Delhivery_New_Bulk_Order.xlsx";
+  }
 
   if (type == '4') {
     filename = "XpressBee_Bulk_Order.csv";
