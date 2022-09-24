@@ -468,6 +468,51 @@ function formateDates(date) {
   }
 }
 
+function calculateShippingCharges(data) {
+  var ordersCount = data.length;
+  var deliveredCount = 0;
+  var andhraCount = 0;
+  var telanganaCount = 0;
+  var othersCount = 0;
+  var andhraDelCount = 0;
+  var telanganaDelCount = 0;
+  var othersDelCount = 0;
+  data.forEach(function(key){
+    if(key.state.toLowerCase() == 'andhra pradesh') {
+      andhraCount++;
+    } else if(key.state.toLowerCase() == 'telangana') {
+      telanganaCount++;
+    } else {
+      othersCount++;
+    }
+
+    if(key.orderStatus && key.orderStatus.toLowerCase() == 'delivered') {
+      deliveredCount++;
+
+      if(key.state.toLowerCase() == 'andhra pradesh') {
+        andhraDelCount++;
+      } else if(key.state.toLowerCase() == 'telangana') {
+        telanganaDelCount++;
+      } else {
+        othersDelCount++;
+      }  
+    }
+
+    
+  });
+  var $table = $('.orderStatusBoard');
+  $table.find('.tolOrders span').html(ordersCount);
+  $table.find('.apOrders span').html(andhraCount);
+  $table.find('.tsOrders span').html(telanganaCount);
+  $table.find('.orOrders span').html(othersCount);
+  $table.find('.tolOrdersDel span').html(deliveredCount);
+  $table.find('.apOrdersDel span').html(andhraDelCount);
+  $table.find('.tsOrdersDel span').html(telanganaDelCount);
+  $table.find('.orOrdersDel span').html(othersDelCount);
+
+  console.log(deliveredCount, andhraCount, telanganaCount, othersCount);
+}
+
 // var currentTable;
 function renderOrders(div, data, isParse) {
   let parseData;
@@ -499,6 +544,8 @@ function renderOrders(div, data, isParse) {
       // console.log(date);
       return date < sevenDaysBefore;
     });
+  } else if (div === 'exportTable') {
+    calculateShippingCharges(parseData);
   }
 
   // currentTable =
