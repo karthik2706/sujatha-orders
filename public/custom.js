@@ -166,6 +166,7 @@ function renderProfile(data) {
 }
 
 function orderSumitted(data, resp) {
+  // console.log(data);
   var orderData = data.fields;
   const $printHtml = $("#element-to-print");
   if (orderData.vendor === "1") {
@@ -243,31 +244,8 @@ function orderSumitted(data, resp) {
   }
 }
 
-function moveToXpressBeesOrder(data, target) {
-  // console.log(data);
-  // console.log(target);
-  var orderId = data[0].id;
-  console.log(orderId);
-  var orderRef = `/oms/clients/${clientRef}/orders/${orderId}`;
-  var order = firebase
-  .app()
-  .database()
-  .ref(orderRef);
-  
-  order
-    .once("value")
-    .then((snapshot) => {
-      ordersData = snapshot.val();
-      console.log(ordersData);
-
-      // window.orderData = snapshot.val();
-      // // console.log(Object.keys(ordersData).length);
-      // renderOrders(div, ordersData, true);
-      // $loading.hide();
-    });
-}
-
 function createXpressBeesOrder(value, target) {
+  // console.log(value);
   var orderObj = {
     "id": value.ref.replace(' ', '-') + value.mobile.slice(-5),
     "payment_method": value.cod == "1" ? "COD" : "prepaid",
@@ -317,27 +295,27 @@ function createXpressBeesOrder(value, target) {
 
   // console.log(orderObj);
 
-  // $.ajax({
-  //   type: 'POST',
-  //   beforeSend: function (xhr) {
-  //     xhr.setRequestHeader('Authorization', 'Bearer ' + Cookies.get('xpressLogin'));
-  //   },
-  //   url: 'https://ship.xpressbees.com/api/franchise/shipments',
-  //   data: JSON.stringify(orderObj),
-  //   contentType: "application/json; charset=utf-8"
-  // }).done(function (resp) {
-  //   var data = JSON.parse(resp);
-  //   // console.log(data);
-  //   if (data.response) {
-  //     // console.log(data.awb_number);
-  //     trackingDCallback(data.awb_number, target);
-  //   } else {
-  //     alert(data.message);
-  //     console.log('XpressBees Order Creation Failed');
-  //   }
-  // }).fail(function (resp) {
-  //   console.log(resp.message);
-  // })
+  $.ajax({
+    type: 'POST',
+    beforeSend: function (xhr) {
+      xhr.setRequestHeader('Authorization', 'Bearer ' + Cookies.get('xpressLogin'));
+    },
+    url: 'https://ship.xpressbees.com/api/franchise/shipments',
+    data: JSON.stringify(orderObj),
+    contentType: "application/json; charset=utf-8"
+  }).done(function (resp) {
+    var data = JSON.parse(resp);
+    // console.log(data);
+    if (data.response) {
+      // console.log(data.awb_number);
+      trackingDCallback(data.awb_number, target);
+    } else {
+      alert(data.message);
+      console.log('XpressBees Order Creation Failed');
+    }
+  }).fail(function (resp) {
+    console.log(resp.message);
+  })
 }
 
 //Call back after fetching delhivery waybill
@@ -1178,10 +1156,7 @@ $(document).ready(function () {
                     courier = "dtdc";
                   } else if (details[0] == "4") {
                     courier = "xpressbees";
-                  } 
-                  
-    
-
+                  }
                   if (details[1] && details[1].trim().length) {
                     tracking = details[1];
                     link =
@@ -1189,12 +1164,6 @@ $(document).ready(function () {
                       courier +
                       "&tracking-numbers=" +
                       tracking;
-                  }
-
-                  if (details[0] == "5") {
-                    tracking = details[1];
-                    link =
-                      "https://www.delhivery.com/track/package/" + tracking;
                   }
 
                   if (link && link.length) {
@@ -1281,11 +1250,7 @@ $(document).ready(function () {
     // } 
     else if ($this.hasClass("xpressStatus")) {
       checkXpressBeesStatus(rowLis, e);
-    } else if($this.hasClass("move-to-xpress")) {
-      //Move to XpressBees
-      // checkXpressBeesStatus(rowLis, e);
-      moveToXpressBeesOrder(rowLis, e);
-    }
+    } 
     // else if ($this.hasClass("fetchData")) {
     //   fetchStatus(selectedRows, e);
     // }
