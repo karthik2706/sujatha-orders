@@ -1166,6 +1166,12 @@ $(document).ready(function () {
                       tracking;
                   }
 
+                  if (details[0] == "5") {
+                    tracking = details[1];
+                    link =
+                      "https://www.delhivery.com/track/package/" + tracking;
+                  }
+
                   if (link && link.length) {
                     linkEl =
                       'Click here -> <a target="_blank" href="' +
