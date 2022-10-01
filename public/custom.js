@@ -1486,17 +1486,17 @@ $(document).ready(function () {
       // $pageBreak.append("<h1 class='logo-align center-align'><img src='suj.png'></h2><br>");
       $pageBreak.append("<h2 class='center-align'>" + "Delhivery Courier" + "</h2>");
       $pageBreak.append("<p class='center-align'>" + "(old account)" + "</p><br>");
-      $pageBreak.append("<h3 class='center-align'>" + payment +": Rs."+ (orderData.codprice || '') +"/-"+ "</h3><br>");
+      $pageBreak.append("<h3 class='center-align'>" + payment + (orderData.cod == "1" ? ": Rs." : "") + (orderData.cod == "1" ? orderData.codprice + "/-" : '') + "</h3><br>");
       $pageBreak.append("<h3 class='center-align'><svg class='barcode-track' data-tracking=" + orderData.tracking + "></svg></h3>");
     } else if (orderData.vendor === "4") {
       // $pageBreak.append("<h1 class='logo-align center-align'><img src='suj.png'></h2><br>");
       $pageBreak.append("<h2 class='center-align'>" + "XpressBees Courier" + "</h2><br>");
-      $pageBreak.append("<h3 class='center-align'>" + payment + (orderData.cod == "1" ? ": Rs." : "") + ((orderData.codprice + "/-") || '') + "</h3><br>");
+      $pageBreak.append("<h3 class='center-align'>" + payment + (orderData.cod == "1" ? ": Rs." : "") + (orderData.cod == "1" ? orderData.codprice + "/-" : '') + "</h3><br>");
       $pageBreak.append("<h3 class='center-align'><svg class='barcode-track' data-tracking=" + orderData.tracking + "></svg></h3>");
     } else if (orderData.vendor === "5") {
       $pageBreak.append("<h2 class='center-align'>" + "Delhivery Courier" + "</h2>");
       $pageBreak.append("<p class='center-align'>" + "(new account)" + "</p><br>");
-      $pageBreak.append("<h3 class='center-align'>" + payment +": Rs."+ (orderData.codprice || '') +"/-"+ "</h3><br>");
+      $pageBreak.append("<h3 class='center-align'>" + payment + (orderData.cod == "1" ? ": Rs." : "") + (orderData.cod == "1" ? orderData.codprice + "/-" : '') + "</h3><br>");
       $pageBreak.append("<h3 class='center-align'><svg class='barcode-track' data-tracking=" + orderData.tracking + "></svg></h3>");
     }
     else {
