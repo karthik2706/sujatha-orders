@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "sujatha-gold-covering",
+  "private_key_id": "2ad1ea7dcb4d371ca5a17abc8623807a3cb68b1f",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCS9JbMnMFTduAB\n0k70U8VI28f3BqGXTOdu98xM0Okmj5Ol81JmW7ULGKf7mTpFnwduu+97vnWyCEKK\nXcWKmGlzGr/q1eqqKFo1jMxjcX1fwsoWbDUbjEUNeQtyiy1UG3swSoDrfej/glsi\n5oqq4xHWtIDw4KTirDuGcYY2E/rqOnb4VQTtYoM9838h2If+b9m2KHfN7n1mFtvE\nOpqSM5l4Vld2YHAMLtYEfMTnlD+oXhGeaWmU1fd3iOHRdI8pNN7kWAhHdHO9Jdc3\n9mcmrhcqeI2KDH2wiZOYhjg23dQ+xKngA0G8GlcoXPuDX/LfquugrE82HNLlsEiF\nmau1y3ZbAgMBAAECggEAOiXl9ZihNrF2+cGJ1EvBaI7ulORe1Ett2A7dHBgd6VAu\nkB+znyTygi2Dap663AmNG1fp7wDx+TwjeDSakbi1IQKYpgd3D1VgPIg157NkdJvS\n8wRmDzx1plsbGHvRt9IX8IfKc2Qi6dde0HSAshWfXWGXE7kQBVE5TH1nKcbGJh/a\npIARW1zW52C3yG0gpXM4IhHmRErbEFrNAbYBzFewyiWLJ2kCtSd7iBZdsSlGCvqZ\ng6Gy2duM86KuXvRpwF0AprNBkSRL4W2LrKEDxhpj1HKbe/GLRdm2ZudDqGafwedt\nN5TClWN3BT16qsiftQhO7tgn1vgHdjJv2QpghAvrQQKBgQDF3RA9FSNh+wgdN1qG\nRi+cIAxZRgrJCvWXpPbD3OBNsPXOoemVgSCoPqRvWWiObniIG6YpdFrtTE+BP1Dc\nfiBbvrK8a13CoMeEJmhbTARjaCxYGjrshXrT9t2LnPLGCQjn6U4sg6HPSKo71I9+\norhcyNlqbsuPBqdiz+uQRWcpswKBgQC+Ik9sjeihCsV7fir+GdOsN/15LGKLxS0P\nPid9wiTtEZdezi8fbZ2DWOsxHNnDRQafhePXzeNCkMplfZ4klUuMY+EoRvbGiSS9\ngad498iaJI8aFgNUXOGwvQwKOvd+HQWl7+Va71vHj5KHDfyyBTDAcr5plcLtQJcx\nBKxk0rZcuQKBgAWBwZHxpKp1ciReBgb2rRyLR8y0RliSFYPC85s/6n4/DphRqU6f\n6WjFVY5DzsUoDfK70kQVGPLBzPSr7nQ0jnH/PLpBwrpH/0WOTBk+ZGDf5VwOXtV2\nYZTEqiXYmGkqlzTdKW/Tug0q2JIRuGyt2rO6Y1KzArdYWBBH+SZqyBRBAoGBAKFS\njz018umhMAol9OiAlV8Map7DkCGzfRXv0KYdciNLx7mDC+yInxrw+S1Eo2fRS1tS\nyQ0z/d1e6LvQJ7w2iFFn9YStIXk2p9u7BJPY+XYACwNBJjYQUNYasPqFKbTxfvda\nYqoTaTYblWHN9lg9my3Orcz8atXO9fl7U6KAPobRAoGAMV0n6ABjGz/YapgQF7n5\ng1DOJKw2N4+hCsq8XN9Y0IDnq0j0p65ra+CMRvUH9B1+eL+xfd3HRfUK0Qs3PV8Y\nqO7AsLA6u8FIzpS3PCjKVOTQ7bEBU8ofrSETmPTCz0aE5jmkbq/p4zrCwhBxz+MD\nRmoj3t2ijz6XqEjjLwp+8Ww=\n-----END PRIVATE KEY-----\n",
+  "client_email": "sujatha-gold-covering@appspot.gserviceaccount.com",
+  "client_id": "100001625712117911535",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/sujatha-gold-covering%40appspot.gserviceaccount.com"
+}

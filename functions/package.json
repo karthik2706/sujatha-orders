@@ -1,0 +1,36 @@
+{
+  "name": "functions-sujatha",
+  "description": "Cloud Functions for Firebase",
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "16"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "ajv": "^8.8.1",
+    "ajv-dist": "^8.8.1",
+    "api": "^4.1.0",
+    "body-parser": "^1.20.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.3",
+    "firebase-admin": "^10.0.2",
+    "firebase-functions": "^3.21.2",
+    "formidable": "^2.0.1",
+    "googleapis": "^100.0.0",
+    "lodash": "^4.17.21",
+    "node-fetch": "^3.2.10",
+    "querystring": "^0.2.1",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.6"
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^0.2.0"
+  },
+  "private": true
+}
