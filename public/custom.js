@@ -1596,6 +1596,7 @@ window.onload = function () {
   }, 5000);
 };
 
+
 function createDelhiveryOrderOnline(data, vendor) {
   const req = data.fields;
   const options = {
@@ -1633,16 +1634,28 @@ function createDelhiveryOrderOnline(data, vendor) {
     })
   };
 
-  fetch('http://localhost:5001/sujatha-gold-covering/us-central1/createOrders', options)
-    .then(response => response.json())
-    .then(function (response) {
-      orderCreatedDelhivery(response, data)
-    })
-    .catch(err => {
-      alert('Error Occurred, Order not created, Try again');
-      console.error(err);
-      $('#createOrder .OrderSubmit').removeAttr('disabled');
-    });
+  var createDelhiveryOrder = firebase.functions().httpsCallable('createOrdersDelhivery');
+  createDelhiveryOrder(options)
+  .then(response => response.json())
+  .then(function (response) {
+    orderCreatedDelhivery(response, data)
+  })
+  .catch(err => {
+    alert('Error Occurred, Order not created, Try again');
+    console.error(err);
+    $('#createOrder .OrderSubmit').removeAttr('disabled');
+  });
+
+  // fetch('http://localhost:5001/sujatha-gold-covering/us-central1/createOrdersDelhivery', options)
+  //   .then(response => response.json())
+  //   .then(function (response) {
+  //     orderCreatedDelhivery(response, data)
+  //   })
+  //   .catch(err => {
+  //     alert('Error Occurred, Order not created, Try again');
+  //     console.error(err);
+  //     $('#createOrder .OrderSubmit').removeAttr('disabled');
+  //   });
 }
 
 function orderCreatedDelhivery(resp, data) {
