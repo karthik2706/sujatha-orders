@@ -45,10 +45,10 @@ var xpressCred = {};
 //Fetch API keys
 function fetchApiKeys() {
   var apiKeys = firebase
-  .app()
-  .database()
-  .ref(`/oms/clients/${clientRef}/apiKeys`);
-  
+    .app()
+    .database()
+    .ref(`/oms/clients/${clientRef}/apiKeys`);
+
   apiKeys
     .once("value")
     .then((snapshot) => {
@@ -143,10 +143,10 @@ function createCustomer(data) {
 
 function fetchProfile() {
   var profile = firebase
-  .app()
-  .database()
-  .ref(`/oms/clients/${clientRef}/profile/${profileRef}`);
-  
+    .app()
+    .database()
+    .ref(`/oms/clients/${clientRef}/profile/${profileRef}`);
+
   profile
     .once("value")
     .then((snapshot) => {
@@ -353,6 +353,53 @@ function trackingDCallback(data, OrderDetails) {
     })
     .then(function () {
       refreshOrders();
+      // sendSMSFunction(OrderDetails);
+    });
+}
+
+//Send SMS Confirmation
+function sendSMSFunction(details) {
+  var orderId = details[4];
+  //Update Tracking number for Delhivery Order
+  var orderRef = firebase
+    .app()
+    .database()
+    .ref(`/oms/clients/${clientRef}/orders/${orderId}/fields`);
+  orderRef
+    .once("value")
+    .then((snapshot) => {
+      ordersData = snapshot.val();
+      console.log(ordersData);
+      // $.ajax({
+      //   type: 'POST',
+      //   beforeSend: function (xhr) {
+      //     xhr.setRequestHeader('Authorization', 'Bearer ' + ' ' + 'avumasusa4yTumu2yVuEyRa6aAu9e8aAyGea');
+      //   },
+      //   url: 'https://api.enablex.io/sms/v1/messages/',
+      //   crossDomain: true,
+      //   data: JSON.stringify({
+      //     "body": "Hello Karthik",
+      //     "direct": true,
+      //     "recipient": [
+      //       {
+      //         "to": "+919142001199",
+      //         "name": "Karthik",
+      //         "amount": "30",
+      //         "body": "This body supercedes with direct: true",
+      //         "uuid": "String"
+      //       }
+      //     ],
+      //     "type": "sms",
+      //     "reference": "XOXO",
+      //     "validity": "30",
+      //     "type_details": "",
+      //     "data_coding": "plain",
+      //     "campaign_id": "13647988",
+      //   }),
+      //   contentType: "application/json; charset=utf-8"
+      // }).done(function (resp) {
+      //   console.log(resp)
+      // })
     });
 }
 
@@ -395,11 +442,11 @@ function fetchOrders(div) {
   $loading.show();
   var orderRef = `/oms/clients/${clientRef}/orders`;
   var orders = firebase
-  .app()
-  .database()
-  .ref(orderRef);
-  
-    orders
+    .app()
+    .database()
+    .ref(orderRef);
+
+  orders
     .once("value")
     .then((snapshot) => {
       ordersData = snapshot.val();
@@ -416,10 +463,10 @@ function deleteOldOrders() {
   var orderRef = `/oms/clients/${clientRef}/orders`;
 
   var orders = firebase
-  .app()
-  .database()
-  .ref(orderRef);
-  
+    .app()
+    .database()
+    .ref(orderRef);
+
   orders
     .once("value")
     .then((snapshot) => {
@@ -477,28 +524,28 @@ function calculateShippingCharges(data) {
   var andhraDelCount = 0;
   var telanganaDelCount = 0;
   var othersDelCount = 0;
-  data.forEach(function(key){
-    if(key.state.toLowerCase() == 'andhra pradesh') {
+  data.forEach(function (key) {
+    if (key.state.toLowerCase() == 'andhra pradesh') {
       andhraCount++;
-    } else if(key.state.toLowerCase() == 'telangana') {
+    } else if (key.state.toLowerCase() == 'telangana') {
       telanganaCount++;
     } else {
       othersCount++;
     }
 
-    if(key.orderStatus && key.orderStatus.toLowerCase() == 'delivered') {
+    if (key.orderStatus && key.orderStatus.toLowerCase() == 'delivered') {
       deliveredCount++;
 
-      if(key.state.toLowerCase() == 'andhra pradesh') {
+      if (key.state.toLowerCase() == 'andhra pradesh') {
         andhraDelCount++;
-      } else if(key.state.toLowerCase() == 'telangana') {
+      } else if (key.state.toLowerCase() == 'telangana') {
         telanganaDelCount++;
       } else {
         othersDelCount++;
-      }  
+      }
     }
 
-    
+
   });
   var $table = $('.orderStatusBoard');
   $table.find('.tolOrders span').html(ordersCount);
@@ -627,8 +674,8 @@ function renderOrders(div, data, isParse) {
               courier = "Xpressbees";
               break;
             case "5":
-                courier = "Delhivery New";
-                break;
+              courier = "Delhivery New";
+              break;
           }
           return courier;
         },
@@ -969,13 +1016,13 @@ $(document).ready(function () {
       .each(function () {
         filters[this.name] = $(this).val();
       });
-      
-      var orders = firebase
+
+    var orders = firebase
       .app()
       .database()
       .ref(`/oms/clients/${clientRef}/orders`);
 
-      orders
+    orders
       .once("value")
       .then((snapshot) => {
         ordersData = snapshot.val();
@@ -1106,9 +1153,9 @@ $(document).ready(function () {
     $("#orderResults").removeClass("hide");
 
     var orders = firebase
-    .app()
-    .database()
-    .ref(`/oms/clients/${clientRef}/orders`);
+      .app()
+      .database()
+      .ref(`/oms/clients/${clientRef}/orders`);
 
     orders
       .once("value")
@@ -1222,7 +1269,7 @@ $(document).ready(function () {
     e.preventDefault();
     var $this = $(this);
     var table = $("#example");
-    if($this.hasClass('exportAction')) {
+    if ($this.hasClass('exportAction')) {
       table = $('#exportTable');
     }
     var rows = table.find("tbody tr");
@@ -1250,13 +1297,13 @@ $(document).ready(function () {
       printSlips(selectedRows, e);
     } else if ($this.hasClass("deleteOrders")) {
       deleteOrders(selectedRows, e);
-    } 
+    }
     // else if ($this.hasClass("move-to-old")) {
     //   moveToOldOrders(selectedRows, e);
     // } 
     else if ($this.hasClass("xpressStatus")) {
       checkXpressBeesStatus(rowLis, e);
-    } 
+    }
     // else if ($this.hasClass("fetchData")) {
     //   fetchStatus(selectedRows, e);
     // }
@@ -1340,31 +1387,31 @@ $(document).ready(function () {
         })
       } else if (vendor === 'Delhivery COD' || vendor === 'Delhivery New') {
         var clientKey = clientKeyDNew;
-        if(vendor === 'Delhivery COD') {
+        if (vendor === 'Delhivery COD') {
           clientKey = clientKeyD;
         }
         $.ajax({
           url: 'https://track.delhivery.com/api/v1/packages/json/?token=' + clientKey + '&waybill=' + tracking,
           dataType: 'jsonp',
           success: function (resp) {
-            if(resp.Error) {
+            if (resp.Error) {
               firebase
-              .app()
-              .database()
-              .ref(orderRef)
-              .update({
-                orderStatus: resp.Error
-              });
+                .app()
+                .database()
+                .ref(orderRef)
+                .update({
+                  orderStatus: resp.Error
+                });
             } else {
               var data = resp.ShipmentData[0];
               var status = data.Shipment.Status.Status;
               firebase
-              .app()
-              .database()
-              .ref(orderRef)
-              .update({
-                orderStatus: status
-              });
+                .app()
+                .database()
+                .ref(orderRef)
+                .update({
+                  orderStatus: status
+                });
             }
           }
         });
@@ -1442,7 +1489,7 @@ $(document).ready(function () {
   }
 
   var countSlips;
-  
+
   //Print Slips
   function printSlips(data, e) {
     countSlips = data.length;
@@ -1452,13 +1499,13 @@ $(document).ready(function () {
     $(data).each(function (index, val) {
       var orderId = val;
       var orderData;
-      if(window.orderData[orderId]) {
+      if (window.orderData[orderId]) {
         orderData = window.orderData[orderId].fields;
       } else {
         var orderRef = firebase
-        .app()
-        .database()
-        .ref(`/oms/clients/${clientRef}/orders/${orderId}/fields`);
+          .app()
+          .database()
+          .ref(`/oms/clients/${clientRef}/orders/${orderId}/fields`);
 
         orderRef.once("value").then((snapshot) => {
           orderData = snapshot.val();
@@ -1473,7 +1520,7 @@ $(document).ready(function () {
 
   //generate PDF
   function generatePdf(data, index) {
-    if(!data)  {
+    if (!data) {
       return;
     }
     var orderData = data;
@@ -1522,18 +1569,18 @@ $(document).ready(function () {
 
     if (orderData.vendor === "1") {
       $pageBreak
-      .append("<div class='fromAdd'><h4>From:</h4></div>")
-      .append(
-        (orderData.rname || profileData.cname) +
-        "<br>" +
-        (orderData.vendor === "1"
-          ? profileData.retAddress.replace(/(?:\r\n|\r|\n)/g, "<br>") + "<br>"
-          : "") +
-        "Mobile: " +
-        (orderData.rmobile || profileData.cnumber)
-      );
+        .append("<div class='fromAdd'><h4>From:</h4></div>")
+        .append(
+          (orderData.rname || profileData.cname) +
+          "<br>" +
+          (orderData.vendor === "1"
+            ? profileData.retAddress.replace(/(?:\r\n|\r|\n)/g, "<br>") + "<br>"
+            : "") +
+          "Mobile: " +
+          (orderData.rmobile || profileData.cnumber)
+        );
     }
-    
+
 
     $printHtml.append($pageBreak);
 
@@ -1621,42 +1668,36 @@ function generateXL(type, data) {
       "COD",
       "InsVal",
       "VPP",
-      "PrPdAmount",
-      "PrPdType",
-      "FMLisenceId",
-      "FMSomNo",
       "L",
       "B",
       "H",
       "ContentType",
+      "Priority"
     ];
 
     $.each(data, function (index, value) {
       xlsRows.push({
         SL: index + 1,
         Barcode: value.tracking,
-        Ref: "",
+        Ref: value.ref || value.mobile.slice(-5),
         City: value.city,
         Pincode: value.pincode,
         Name: value.name,
-        ADD1: value.address,
+        ADD1: value.address.replace(/\s+/g, ' ').trim(),
         ADD2: "",
         ADD3: "",
         ADDREMAIL: value.email,
         ADDRMOBILE: value.mobile,
-        SENDERMOBILE: value.rmobile,
+        SENDERMOBILE: value.rmobile || profileData.cnumber,
         Weight: value.weight,
         COD: "",
         InsVal: "",
         VPP: "",
-        PrPdAmount: "",
-        PrPdType: "",
-        FMLisenceId: "",
-        FMSomNo: "",
         L: "",
         B: "",
         H: "",
         ContentType: "",
+        Priority: ""
       });
     });
   } else if (type == "2" || type == "5") {
@@ -1708,7 +1749,7 @@ function generateXL(type, data) {
         City: value.city,
         State: value.state,
         Country: value.country || "India",
-        Address: value.address,
+        Address: value.address.replace(/\s+/g, ' ').trim(),
         Pincode: value.pincode,
         Phone: "",
         Mobile: value.mobile.replace("+91", ""),
@@ -1846,7 +1887,7 @@ function generateXL(type, data) {
   });
 
   /* File Name */
-  var filename = "Delhivery_COD_Bulk_Order.xlsx";
+  var filename = "SUJATHA GOLD COVERING "+ new Date().getDate() +".xls";
 
   if (type == '5') {
     filename = "Delhivery_New_Bulk_Order.xlsx";
