@@ -1529,6 +1529,14 @@ $(document).ready(function () {
 
     if (orderData.vendor === "1") {
       $pageBreak.append("<h2>" + "Registered Parcel" + "</h2><br>");
+      $pageBreak
+      .append(
+        "<h3 class='postDetails'>" + 
+        "<u>BNPL</u><br>" +
+        "Unique Customer ID: 3000047704<br>" +
+        "Contract No: 40185593<br>" +
+        "</h3><br>"
+      );
     } else if (orderData.vendor === "2") {
       // $pageBreak.append("<h1 class='logo-align center-align'><img src='suj.png'></h2><br>");
       $pageBreak.append("<h2 class='center-align'>" + "Delhivery Courier" + "</h2>");
@@ -1608,7 +1616,7 @@ $(document).ready(function () {
         .then(function (blob) {
           let url = URL.createObjectURL(blob);
           window.open(url); //opens the pdf in a new tab
-          $printHtml.addClass("hide");
+          // $printHtml.addClass("hide");
         });
     }
   }
