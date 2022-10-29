@@ -1691,7 +1691,7 @@ function generateXL(type, data) {
         City: value.city,
         Pincode: value.pincode,
         Name: value.name,
-        ADD1: value.address.replace(/\s+/g, ' ').trim(),
+        ADD1: value.address.replace(/\s+/g, ' ').substring(0, 15).trim(),
         ADD2: "",
         ADD3: "",
         ADDREMAIL: value.email,
