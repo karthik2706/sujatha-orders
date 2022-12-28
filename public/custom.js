@@ -1687,7 +1687,7 @@ function generateXL(type, data) {
       xlsRows.push({
         SL: index + 1,
         Barcode: value.tracking,
-        Ref: value.ref || value.mobile.slice(-5),
+        Ref: value.ref +'-'+ value.mobile || value.mobile.slice(-5),
         City: value.city,
         Pincode: value.pincode,
         Name: value.name,
@@ -1752,7 +1752,7 @@ function generateXL(type, data) {
     $.each(data, function (index, value) {
       xlsRows.push({
         Waybill: value.tracking || "",
-        ReferenceNo: value.ref || value.mobile.slice(-5),
+        ReferenceNo: value.ref +'-'+ value.mobile || value.mobile.slice(-5),
         ConsigneeName: value.name,
         City: value.city,
         State: value.state,
