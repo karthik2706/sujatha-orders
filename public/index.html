@@ -129,7 +129,6 @@
         <div class="logo">
             <h2>Sujatha Gold Covering</h2>
             <h4>Machilipatnam</h4>
-            <img src="logo.png" alt="">
         </div>
         <br>
         <br>
@@ -162,10 +161,10 @@
                 <button class="nav-link" id="export-tab" data-bs-toggle="tab" data-bs-target="#exportOrders" type="button"
                     role="tab" aria-controls="profile" aria-selected="false">Export Orders</button>
             </li>
-            <li class="nav-item" role="presentation">
+            <!-- <li class="nav-item hide" role="presentation">
                 <button class="nav-link" id="myProfile-tab" data-bs-toggle="tab" data-bs-target="#myProfile" type="button"
                     role="tab" aria-controls="profile" aria-selected="false">Our Profile</button>
-            </li>
+            </li> -->
         </ul>
 
         <br>
@@ -188,8 +187,8 @@
                         <select required name="vendor" class="form-select vendorOption" aria-label="Default select example">
                             <option value="1">India Post</option>
                             <option value="2">Delhivery COD</option>
-                            <option value="3">DTDC</option>
-                            <option value="4">Xpressbees</option>
+                            <!-- <option value="3">DTDC</option> -->
+                            <!-- <option value="4">Xpressbees</option> -->
                             <option value="5" selected>Delhivery New</option>
                         </select>
                     </div>
@@ -222,7 +221,7 @@
                         <label class="form-label">Country <span class="error">*</span></label>
                         <input  name="country" type="text" class="form-control">
                     </div>
-                    <div class="mb-3 col-4">
+                    <div class="mb-3 col-4 hide">
                         <label class="form-label">Email</label>
                         <input name="email" type="text" class="form-control">
                     </div>
@@ -297,12 +296,6 @@
             </div>
             <div class="tab-pane fade" id="myOrders" role="tabpanel" aria-labelledby="profile-tab">
                 <button class="btn btn-primary mb-3 col-3 mr-3 printSlip groupAction" type="submit">Print Slips</button>
-                <!-- <button class="btn btn-primary mb-3 col-3 mr-3 dispatched is-true groupAction" type="submit">Mark as Dispatched</button>
-                <button class="btn btn-primary mb-3 col-3 mr-3 dispatched is-false groupAction" type="submit">Mark as Un Dispatched</button> -->
-                <button class="btn btn-primary mb-3 col-3 mr-3 xpressStatus groupAction" type="submit">Courier Status</button>
-                <!-- <button class="btn btn-primary mb-3 col-3 mr-3 fetchData groupAction" type="submit">Fetch Status</button> -->
-
-                <!-- <button class="btn btn-primary mb-3 col-3 mr-3 move-to-old groupAction" type="submit">Move to Old Orders</button> -->
                 <button type="submit" class="btn btn-danger mb-3 col-3 mr-3 deleteOrders groupAction">Delete Orders</button>
                 <table id="example" class="table table-striped table-bordered" style="width:100%">
 
@@ -311,21 +304,7 @@
                 <div id="bulk-to-print" class="hide"></div>
             </div>
 
-            <!-- <div class="tab-pane fade" id="myOldOrders" role="tabpanel" aria-labelledby="profile-tab">
-                <button class="btn btn-primary mb-3 col-3 mr-3 printSlip groupAction" type="submit">Print Slips</button>
-                <button class="btn btn-primary mb-3 col-3 mr-3 dispatched is-true groupAction" type="submit">Mark as Dispatched</button>
-                <button class="btn btn-primary mb-3 col-3 mr-3 dispatched is-false groupAction" type="submit">Mark as Un Dispatched</button>
-                <button class="btn btn-primary mb-3 col-3 mr-3 move-to-old groupAction" type="submit">Move to Old Orders</button>
-                <button type="submit" class="btn btn-danger mb-3 col-3 mr-3 deleteOrders groupAction">Delete Orders</button>
-                <table id="oldexample" class="table table-striped table-bordered" style="width:100%">
-
-                </table>
-                <br><br><br>
-                <div id="bulk-to-print" class="hide"></div>
-            </div> -->
-
             <div class="tab-pane fade" id="oldOrders" role="tabpanel" aria-labelledby="profile-tab">
-                <!-- <button type="submit" class="btn btn-danger mb-3 col-3 mr-3 deleteOrders groupAction">Delete Orders</button> -->
                 <table id="oldOrdersexample" class="table table-striped table-bordered" style="width:100%">
 
                 </table>
@@ -340,8 +319,8 @@
                         <select required name="vendor" class="form-select" aria-label="Default select example">
                             <option value="1">India Post</option>
                             <option value="2">Delhivery COD</option>
-                            <option value="3">DTDC</option>
-                            <option value="4">Xpressbees</option>
+                           <!--  <option value="3">DTDC</option>
+                            <option value="4">Xpressbees</option> -->
                             <option value="5" selected>Delhivery New</option>
                         </select>
                     </div>
@@ -356,7 +335,7 @@
                       <button class="btn btn-primary mb-3 col-3 bulkBtn" disabled>Export Bulk Orders</button>
                     </div>
 
-                    <div class="orderStatusBoard">
+                    <!-- <div class="orderStatusBoard">
                         <h5 class="tolOrders">Total Orders Created: <span></span></h5>
                         <h5 class="apOrders">Total Andhra Orders: <span></span></h5>
                         <h5 class="tsOrders">Total Telangana Orders: <span></span></h5>
@@ -366,12 +345,13 @@
                         <h5 class="apOrdersDel">Total Andhra Orders Delivered: <span></span></h5>
                         <h5 class="tsOrdersDel">Total Telangana Orders Delivered: <span></span></h5>
                         <h5 class="orOrdersDel">Total Other State Orders Delivered: <span></span></h5>
-                    </div>
+                    </div> -->
                     
                 </form>
                 <br><br>
+                <!-- 
                 <button class="btn btn-primary mb-3 col-3 mr-3 xpressStatus groupAction exportAction" type="submit">Courier Status</button>
-                <br><br>
+                <br><br> -->
                 <table id="exportTable" class="table table-striped table-bordered" style="width:100%">
 
                 </table>
@@ -403,9 +383,9 @@
                         <label class="form-label">Delhivery Pickup Locations (Seperate by ,)</label>
                         <textarea name="pickup" class="form-control" placeholder="Seperate by ,"></textarea>
                     </div>
-                    <br>
+                    <!-- <br>
                     <button class="btn btn-secondary mb-3" type="reset">Reset</button>
-                    <button class="btn btn-primary mb-3" type="submit">Update</button>
+                    <button class="btn btn-primary mb-3" type="submit">Update</button> -->
                 </form>
             </div>
 

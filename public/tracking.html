@@ -51,7 +51,8 @@
         <br>
         <br>
         <div class="logo">
-          <img src="logo.png" alt="">
+            <h2>Sujatha Gold Covering</h2>
+            <h4>Machilipatnam</h4>
         </div>
         <br>
         <br>
@@ -89,19 +90,6 @@
    
 </div>
 
-
-    
-
-    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
-    <script src="https://www.gstatic.com/firebasejs/8.5.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.5.0/firebase-database.js"></script>
-    <!-- If you enabled Analytics in your project, add the Firebase SDK for Analytics -->
-    <script src="https://www.gstatic.com/firebasejs/8.5.0/firebase-analytics.js"></script>
-
-    <!-- Add Firebase products that you want to use -->
-    <script src="https://www.gstatic.com/firebasejs/8.5.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.5.0/firebase-firestore.js"></script>
-
     <!-- Optional JavaScript; choose one of the two! -->
 
     <!-- Option 1: Bootstrap Bundle with Popper -->
@@ -119,12 +107,119 @@
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
 
     <!-- Insert these scripts at the bottom of the HTML, but before you use any Firebase services -->
-    <script src="html2pdf.bundle.js"></script>
+    <!-- <script src="html2pdf.bundle.js"></script>
     <script src="pincodes.js"></script>
-    <script src="custom.js"></script>
+    <script src="custom.js"></script> -->
 
     <script>
         window.page = location.href;
+        $(document).ready(function(){
+            //Tracking Code
+  var $trackingForm = $("#tracking");
+  $(".findOrders").click(function (e) {
+    e.preventDefault();
+    var mobile = $trackingForm.find("[name=mobile]").val();
+    $("#orderResults").removeClass("hide");
+    var apiUrl = `http://localhost:3000/getOrdersByMobile/${mobile}`;
+
+    fetch(apiUrl)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log(data);
+        ordersData = data;
+        // Process the data received from the server (list of orders with the specified mobile number)
+        let parseData = [];
+        $.each(ordersData, function (key, value) {
+          value.id = key;
+          parseData.push(value);
+        });
+
+        console.log('filteredOrders', parseData)
+
+        if ($.fn.DataTable.isDataTable("#trackingTable")) {
+          $("#trackingTable").dataTable().fnDestroy();
+        }
+
+        $.each(parseData, function (key, value) {
+          this.tracking = this.vendor + "_" + this.tracking;
+        });
+
+        $("#trackingTable").DataTable({
+          responsive: true,
+          data: parseData,
+          drawCallback: function () {
+            $("#trackingTable tbody")
+              .find("tr")
+              .each(function () {
+                var data = $(this).find("td:last").text();
+                var linkEl;
+                var details;
+                var link;
+                var courier = "";
+                var tracking = "";
+                if (data && data.length) {
+                  details = data.split("_");
+                  if (details[0] == "1") {
+                    courier = "india-post";
+                  } else if (details[0] == "2") {
+                    courier = "delhivery";
+                  } else if (details[0] == "3") {
+                    courier = "dtdc";
+                  } else if (details[0] == "4") {
+                    courier = "xpressbees";
+                  }
+                  if (details[1] && details[1].trim().length) {
+                    tracking = details[1];
+                    link =
+                      "https://track.aftership.com/trackings?courier=" +
+                      courier +
+                      "&tracking-numbers=" +
+                      tracking;
+                  }
+
+                  if (details[0] == "5") {
+                    tracking = details[1];
+                    link =
+                      "https://www.delhivery.com/track/package/" + tracking;
+                  }
+
+                  if (link && link.length) {
+                    linkEl =
+                      'Click here -> <a target="_blank" href="' +
+                      link +
+                      '">' +
+                      tracking +
+                      "</a>";
+                  } else {
+                    if (courier.length) linkEl = "Pending";
+                  }
+                  $(this).find("td:last").html(linkEl);
+                }
+              });
+          },
+          columns: [
+            { title: "Name", data: "name" },
+            { title: "Mobile", data: "mobile" },
+            {
+              title: "Tracking",
+              data: "tracking",
+              render: function (data) {
+                return data;
+              },
+            },
+          ],
+        });
+
+        // renderOrders("trackingTable", filteredOrders, false);
+      });
+  })
+
+        })
     </script>
 
     <!-- Option 2: Separate Popper and Bootstrap JS -->
