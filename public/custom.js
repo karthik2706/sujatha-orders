@@ -1,11 +1,10 @@
-//Mantra Fashion Jewellery
-const firebaseConfig = window.firebaseConfig;
 
-firebase.initializeApp(firebaseConfig);
+
+var domain = 'http://localhost:3000';
 
 //API keys variables
-var clientKeyD = '52f81411e7185b24602a6b2b4b52ac491ed00a24';
 var urlD = 'https://track.delhivery.com';
+var clientKeyD = '52f81411e7185b24602a6b2b4b52ac491ed00a24';
 var clientName = 'SUJATHAFRANCHISE';
 var clientKeyDNew = 'c5b56fa680db359aae2c36e41ce64bc3b82fac7d';
 var clientNameNew = 'HRENTERPRISESFRANCHISE';
@@ -19,7 +18,7 @@ function createOrder(orderData) {
   var newElementSuccess = $('<p>Order Successfully Created</p>');
   var newElementFailure = $('<p>Order Failed, Please try again</p>');
   // console.log(data);
-  fetch('http://localhost:3000/createOrder', {
+  fetch(`${domain}/createOrder`, {
     method: 'POST', // Specify the HTTP method
     headers: {
       'Content-Type': 'application/json', // Set the content type to JSON
@@ -49,7 +48,7 @@ function createOrder(orderData) {
   //Mark as dispatched
   function deleteOrders(data, e) {
     var tableId = $(e.target).closest('.tab-pane').attr('id');
-    fetch('http://localhost:3000/deleteOrders', {
+    fetch(`${domain}deleteOrders`, {
     method: 'POST', // Specify the HTTP method
     headers: {
       'Content-Type': 'application/json', // Set the content type to JSON
@@ -70,7 +69,7 @@ function createOrder(orderData) {
 
 
 function fetchProfile() {
-  fetch('http://localhost:3000/getProfile')
+  fetch(`${domain}/getProfile`)
     .then(response => response.json())
     .then(data => {
       // console.log(data);
@@ -130,7 +129,7 @@ function orderSumitted(data, resp) {
 function trackingDCallback(data, orderId) {
   // console.log('trackingDCallback', data, orderId);
   //Update Tracking number for Delhivery Order
-  fetch(`http://localhost:3000/updateOrder/${orderId}/${data}`)
+  fetch(`${domain}/updateOrder/${orderId}/${data}`)
     .then(response => response.json())
     .then(data => {
       // console.log('Response:', data);
@@ -161,7 +160,7 @@ function fetchOrders(div) {
   // console.log('Loading started')
 
   // This code runs in the user's browser
-  fetch('http://localhost:3000/getOrders')
+  fetch(`${domain}/getOrders`)
     .then(response => response.json())
     .then(data => {
       // console.log(data);
@@ -320,39 +319,21 @@ function initForm() {
   $("#createOrder").find(".success").text("").removeClass("sucess");
 }
 
-function customSiginin(email, password) {
-  firebase
-    .auth()
-    .signInWithEmailAndPassword(email, password)
-    .then((userCredential) => {
-      // Signed in
-      var user = userCredential.user;
-    })
-    .catch((error) => {
-      var errorCode = error.code;
-      var errorMessage = error.message;
-    });
-}
-
 function authCheck() {
-  firebase.auth().onAuthStateChanged(function (user) {
-    if (user) {
-      // logged in do nothing
-    } else {
-      var ui = new firebaseui.auth.AuthUI(firebase.auth());
-      ui.start("#firebaseui-auth-container", {
-        signInOptions: [
-          {
-            provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-            signInMethod:
-              firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD,
-          },
-        ],
-        signInSuccessUrl: window.location.href,
-      });
-      $("#auth-modal").addClass("show");
-    }
-  });
+  // Check if the 'isLoggedIn' cookie exists
+  const isLoggedInCookie = Cookies.get('isLoggedIn');
+  if (isLoggedInCookie === 'true') {
+    // Cookie exists and its value is 'true'
+    console.log('User is logged in');
+    $("#auth-modal").addClass("hide").removeClass('show');
+    fetchProfile();
+    // You can perform further actions for authenticated users here
+  } else {
+    // Cookie either doesn't exist or its value is not 'true'
+    console.log('User is not logged in');
+    $("#auth-modal").addClass("show").removeClass('hide');
+    // You can handle unauthenticated users here
+  }
 }
 
 $(document).ready(function () {
@@ -363,7 +344,43 @@ $(document).ready(function () {
   var $loading;
   $loading = $(".loading");
   // fetchOrders("example");
-  fetchProfile();
+
+  $('.loginBtn').on('click', function(e){
+    e.preventDefault();
+    var $this = $('#loginUser');
+    var username = $this.find('.username').val();
+    var password = $this.find('.password').val();
+    // Send a POST request to the server
+    fetch(`${domain}/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, password }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.message === 'Login successful') {
+          // Authentication succeeded
+          // message.textContent = 'Login successful';
+          Cookies.set('isLoggedIn', 'true');
+          // Redirect or perform other actions as needed
+          $("#auth-modal").addClass("hide").removeClass('show');
+          authCheck();
+        } else {
+          // Authentication failed
+          Cookies.set('isLoggedIn', 'false');
+          // message.textContent = 'Authentication failed';
+          $("#auth-modal").addClass("show").removeClass('hide');
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        Cookies.set('isLoggedIn', 'false');
+        message.textContent = 'Error occurred during login';
+        $("#auth-modal").addClass("show").removeClass('hide');
+      });
+  })
 
   $("body").on("submit", "#createOrder", function (event) {
     event.preventDefault();
@@ -379,8 +396,6 @@ $(document).ready(function () {
     if (obj.fields.ref == "") {
       obj.fields.ref = obj.fields.mobile.slice(-5);
     }
-    //create xpress order here
-
     createOrder(obj);
   });
 
@@ -398,7 +413,7 @@ $(document).ready(function () {
       })
     );
 
-    fetch(`http://localhost:3000/getOrder/${data}`)
+    fetch(`${domain}/getOrder/${data}`)
       .then(response => response.json())
       .then(data => {
         // console.log(data);
@@ -475,7 +490,7 @@ $(document).ready(function () {
 
     // console.log(obj);
 
-    fetch(`http://localhost:3000/updateOrderDetails/${orderId}`, {
+    fetch(`${domain}/updateOrderDetails/${orderId}`, {
       method: 'PUT', // Specify the HTTP method
       headers: {
         'Content-Type': 'application/json', // Set the content type to JSON
@@ -550,7 +565,7 @@ $(document).ready(function () {
       });
 
     // This code runs in the user's browser
-    fetch('http://localhost:3000/getOrders')
+    fetch(`${domain}/getOrders`)
       .then(response => response.json())
       .then(data => {
         // Process the data received from the server
@@ -745,7 +760,7 @@ function printSlips(data) {
     var orderId = val;
     var orderData;
     if(orderId) {
-      fetch(`http://localhost:3000/getOrder/${orderId}`)
+      fetch(`${domain}/getOrder/${orderId}`)
       .then(response => response.json())
       .then(data => {
         var orderData = data;

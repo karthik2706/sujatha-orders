@@ -295,6 +295,29 @@ app.post('/deleteOrders', (req, res) => {
   });
 });
 
+app.use('/login', cors());
+// Route for handling login
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+  console.log('Login Called');
+  console.log(username, password);
+  // Query the database to check if the user exists
+  db.query('SELECT * FROM users WHERE username = ? AND password = ?', [username, password], (err, results) => {
+    if (err) {
+      console.error('Database error:', err);
+      res.status(500).json({ error: 'Database error' });
+    } else {
+      if (results.length === 1) {
+        // User exists and credentials are correct
+        res.status(200).json({ message: 'Login successful' });
+      } else {
+        // User doesn't exist or credentials are incorrect
+        res.status(401).json({ error: 'Authentication failed' });
+      }
+    }
+  });
+});
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
