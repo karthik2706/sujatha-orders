@@ -1,12 +1,15 @@
 const express = require('express');
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
 const mysql = require('mysql');
-
-const app = express();
-const port = 3000;
-const cors = require('cors'); // Import the 'cors' middleware
+const cors = require('cors');
 const bodyParser = require('body-parser');
 
-
+// Load SSL/TLS certificates
+const privateKey = fs.readFileSync(process.env.SSL_KEY_PATH, 'utf8');
+const certificate = fs.readFileSync(process.env.SSL_CERT_PATH, 'utf8');
+const credentials = { key: privateKey, cert: certificate };
 
 const db = mysql.createConnection({
   host: 'srv1086.hstgr.io',
@@ -107,7 +110,6 @@ app.get('/updateOrder/:orderId/:tracking', (req, res) => {
     }
   });
 });
-
 
 app.use('/getProfile', cors());
 app.get('/getProfile', (req, res) => {
@@ -318,7 +320,10 @@ app.post('/login', (req, res) => {
   });
 });
 
-// Start the server
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+// Create an HTTPS server
+const httpsServer = https.createServer(credentials, app);
+
+// Start listening on port 3000 (HTTPS)
+httpsServer.listen(port, () => {
+  console.log(`Server is running on port ${port} (HTTPS)`);
 });
