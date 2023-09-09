@@ -19,6 +19,8 @@ const db = mysql.createConnection({
   keepAlive: true,
 });
 
+const app = express();
+
 app.use('/', cors());
 
 // Define a route
