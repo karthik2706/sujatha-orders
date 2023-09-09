@@ -1,6 +1,6 @@
 
 
-var domain = '//srv418021.hstgr.cloud:3000';
+var domain = '/omsServices';
 
 //API keys variables
 var urlD = 'https://track.delhivery.com';

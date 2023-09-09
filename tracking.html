@@ -120,7 +120,7 @@
     e.preventDefault();
     var mobile = $trackingForm.find("[name=mobile]").val();
     $("#orderResults").removeClass("hide");
-    var apiUrl = `//srv418021.hstgr.cloud:3000/getOrdersByMobile/${mobile}`;
+    var apiUrl = `/omsServices/getOrdersByMobile/${mobile}`;
 
     fetch(apiUrl)
       .then((response) => {
