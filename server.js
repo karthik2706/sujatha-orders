@@ -9,10 +9,10 @@ const bodyParser = require('body-parser');
 
 
 const db = mysql.createConnection({
-  host: 'srv1086.hstgr.io',
-  user: 'u400549820_sujatha',
+  host: 'srv418021.hstgr.cloud',
+  user: 'sujatha',
   password: 'Darling@2706',
-  database: 'u400549820_sujatha_oms',
+  database: 'sujatha',
   keepAlive: true,
 });
 

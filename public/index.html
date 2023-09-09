@@ -7,9 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Bootstrap CSS -->
-    <link href="bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css">
+    <!-- <link href="bootstrap.min.css" rel="stylesheet"> -->
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css">
+    <link rel="stylesheet" href="//cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css">
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
     <title>Order Management System</title>
@@ -196,7 +196,7 @@
                     
                     <div class="mb-3 col-4">
                         <label class="form-label">Courier Service <span class="error">*</span></label>
-                        <select required name="vendor" class="form-select vendorOption" aria-label="Default select example">
+                        <select required name="vendor" class="form-select form-control vendorOption" aria-label="Default select example">
                             <option value="1">India Post</option>
                             <option value="2">Delhivery COD</option>
                             <!-- <option value="3">DTDC</option> -->
@@ -240,13 +240,13 @@
                     
                     <div class="mb-3 col-4 hide-2">
                         <label class="form-label">Pickup Location <span class="error">*</span></label>
-                        <select name="pickupD" class="form-select" aria-label="Default select example">
+                        <select name="pickupD" class="form-select form-control" aria-label="Default select example">
                             
                         </select>
                     </div>
                     <div class="mb-3 col-4">
                         <label class="form-label">Is COD?</label>
-                        <select required name="cod" class="form-select"
+                        <select required name="cod" class="form-select form-control"
                             aria-label="Default select example">
                             <option value="0">No</option>
                             <option value="1">Yes</option>
@@ -328,7 +328,7 @@
                 <form action="#" id="exportOrder" class="row justify-content-center">
                     <div class="mb-3 col-7">
                         <label class="form-label">Courier Service</label>
-                        <select required name="vendor" class="form-select" aria-label="Default select example">
+                        <select required name="vendor" class="form-select form-control" aria-label="Default select example">
                             <option value="1">India Post</option>
                             <option value="2">Delhivery COD</option>
                            <!--  <option value="3">DTDC</option>

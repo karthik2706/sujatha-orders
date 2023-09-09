@@ -1,6 +1,6 @@
 
 
-var domain = 'http://localhost:3000';
+var domain = 'http://srv418021.hstgr.cloud:3000';
 
 //API keys variables
 var urlD = 'https://track.delhivery.com';
@@ -48,7 +48,7 @@ function createOrder(orderData) {
   //Mark as dispatched
   function deleteOrders(data, e) {
     var tableId = $(e.target).closest('.tab-pane').attr('id');
-    fetch(`${domain}deleteOrders`, {
+    fetch(`${domain}/deleteOrders`, {
     method: 'POST', // Specify the HTTP method
     headers: {
       'Content-Type': 'application/json', // Set the content type to JSON
