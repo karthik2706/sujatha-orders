@@ -11,7 +11,7 @@ const bodyParser = require('body-parser');
 const db = mysql.createConnection({
   host: 'srv418021.hstgr.cloud',
   port: 3306,
-  user: 'sujatha',
+  user: 'sujatha_oms',
   password: 'Darling@2706',
   database: 'sujatha',
   keepAlive: true,
