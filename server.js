@@ -5,6 +5,7 @@ const path = require('path');
 const mysql = require('mysql');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const port = 3000;
 
 const db = mysql.createConnection({
   host: 'srv1086.hstgr.io',
