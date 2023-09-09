@@ -11,15 +11,6 @@
           "SSL_CERT_PATH": "/etc/letsencrypt/live/sujathagold.com/fullchain.pem",
           "SSL_KEY_PATH": "/etc/letsencrypt/live/sujathagold.com/privkey.pem"
         }
-      },
-      {
-        "name": "my-server",
-        "script": "sever.js",
-        "instances": 2,
-        "exec_mode": "fork",
-        "env": {
-          "NODE_ENV": "production"
-        }
       }
     ]
   }
