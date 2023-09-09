@@ -21,6 +21,14 @@ const privateKey = fs.readFileSync(process.env.SSL_KEY_PATH || '/etc/letsencrypt
 const certificate = fs.readFileSync(process.env.SSL_CERT_PATH || '/etc/letsencrypt/live/sujathagold.com/privkey.pem', 'utf8');
 const credentials = { key: privateKey, cert: certificate };
 
+// Create an HTTPS server
+const httpsServer = https.createServer(credentials, app);
+
+// Start listening on port 3000 (HTTPS)
+httpsServer.listen(process.env.PORT || 3000, () => {
+  console.log(`Server is running on port ${port} (HTTPS)`);
+});
+
 app.use('/', cors());
 
 // Define a route
@@ -322,12 +330,4 @@ app.post('/login', (req, res) => {
       }
     }
   });
-});
-
-// Create an HTTPS server
-const httpsServer = https.createServer(credentials, app);
-
-// Start listening on port 3000 (HTTPS)
-httpsServer.listen(process.env.PORT || 3000, () => {
-  console.log(`Server is running on port ${port} (HTTPS)`);
 });
