@@ -9,7 +9,7 @@ const bodyParser = require('body-parser');
 
 
 const db = mysql.createConnection({
-  host: '62.72.0.231',
+  host: 'localhost',
   port: 3306,
   user: 'root',
   password: 'ammananna',
