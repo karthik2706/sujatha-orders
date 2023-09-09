@@ -1,17 +1,21 @@
+const https = require('https');
+const fs = require('fs');
 const express = require('express');
+
 const app = express();
-const path = require('path');
 
-// Serve static files from the 'public' directory
-app.use(express.static(path.join(__dirname, './')));
+// Load SSL/TLS certificates
+const privateKey = fs.readFileSync(process.env.SSL_KEY_PATH, 'utf8');
+const certificate = fs.readFileSync(process.env.SSL_CERT_PATH, 'utf8');
+const credentials = { key: privateKey, cert: certificate };
 
-// Define a route for the homepage
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+// Create an HTTPS server
+const httpsServer = https.createServer(credentials, app);
+
+// Start listening on the HTTPS port (443)
+httpsServer.listen(process.env.PORT, () => {
+  console.log(`Server is running on port ${process.env.PORT} (HTTPS)`);
 });
 
-const port = process.env.PORT || 80;
-
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-});
+// Define your routes and middleware here
+// ...
