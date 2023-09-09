@@ -15,7 +15,7 @@
       {
         "name": "my-server",
         "script": "server.js",
-        "instances": 1,
+        "instances": 2,
         "exec_mode": "fork",
         "env": {
           "NODE_ENV": "production",
