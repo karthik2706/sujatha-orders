@@ -2,7 +2,7 @@
     "apps": [
       {
         "name": "my-client",
-        "script": "/public/client.js",
+        "script": "client.js",
         "instances": 1,
         "exec_mode": "fork",
         "env": {
@@ -14,7 +14,7 @@
       },
       {
         "name": "my-server",
-        "script": "/public/sever.js",
+        "script": "sever.js",
         "instances": 2,
         "exec_mode": "fork",
         "env": {
