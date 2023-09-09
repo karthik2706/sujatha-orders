@@ -1,8 +1,8 @@
 {
     "apps": [
       {
-        "name": "my-server",
-        "script": "server.js",
+        "name": "my-client",
+        "script": "client.js",
         "instances": 1,
         "exec_mode": "fork",
         "env": {
