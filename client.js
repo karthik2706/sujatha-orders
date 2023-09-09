@@ -1,6 +1,7 @@
+const express = require('express');
 const https = require('https');
 const fs = require('fs');
-const express = require('express');
+const path = require('path');
 
 const app = express();
 
@@ -9,13 +10,18 @@ const privateKey = fs.readFileSync(process.env.SSL_KEY_PATH, 'utf8');
 const certificate = fs.readFileSync(process.env.SSL_CERT_PATH, 'utf8');
 const credentials = { key: privateKey, cert: certificate };
 
+// Serve static files from the root directory
+app.use(express.static(__dirname));
+
+// Define a route for the homepage
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 // Create an HTTPS server
 const httpsServer = https.createServer(credentials, app);
 
 // Start listening on the HTTPS port (443)
-httpsServer.listen(process.env.PORT, () => {
-  console.log(`Server is running on port ${process.env.PORT} (HTTPS)`);
+httpsServer.listen(process.env.PORT || 443, () => {
+  console.log(`Server is running on port ${process.env.PORT || 443} (HTTPS)`);
 });
-
-// Define your routes and middleware here
-// ...
