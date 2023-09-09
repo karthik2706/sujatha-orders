@@ -19,6 +19,8 @@ const db = mysql.createConnection({
   keepAlive: true,
 });
 
+app.use('/', cors());
+
 // Define a route
 app.get('/', (req, res) => {
   res.send('Hello, Node.js server!');
