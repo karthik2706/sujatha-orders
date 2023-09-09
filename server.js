@@ -7,8 +7,8 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 
 // Load SSL/TLS certificates
-const privateKey = fs.readFileSync(process.env.SSL_KEY_PATH, 'utf8');
-const certificate = fs.readFileSync(process.env.SSL_CERT_PATH, 'utf8');
+const privateKey = fs.readFileSync('/etc/letsencrypt/live/sujathagold.com/fullchain.pem', 'utf8');
+const certificate = fs.readFileSync('/etc/letsencrypt/live/sujathagold.com/privkey.pem', 'utf8');
 const credentials = { key: privateKey, cert: certificate };
 
 const db = mysql.createConnection({
