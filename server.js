@@ -1,10 +1,12 @@
 const express = require('express');
-const https = require('https');
-const fs = require('fs');
-const path = require('path');
 const mysql = require('mysql');
-const cors = require('cors');
+
+const app = express();
+const port = 3000;
+const cors = require('cors'); // Import the 'cors' middleware
 const bodyParser = require('body-parser');
+
+
 
 const db = mysql.createConnection({
   host: 'srv1086.hstgr.io',
@@ -13,23 +15,6 @@ const db = mysql.createConnection({
   database: 'u400549820_sujatha_oms',
   keepAlive: true,
 });
-
-const app = express();
-
-// Load SSL/TLS certificates
-const privateKey = fs.readFileSync(process.env.SSL_KEY_PATH || '/etc/letsencrypt/live/sujathagold.com/fullchain.pem', 'utf8');
-const certificate = fs.readFileSync(process.env.SSL_CERT_PATH || '/etc/letsencrypt/live/sujathagold.com/privkey.pem', 'utf8');
-const credentials = { key: privateKey, cert: certificate };
-
-// Create an HTTPS server
-const httpsServer = https.createServer(credentials, app);
-
-// Start listening on port 3000 (HTTPS)
-httpsServer.listen(process.env.PORT || 3000, () => {
-  console.log(`Server is running on port ${port} (HTTPS)`);
-});
-
-app.use('/', cors());
 
 // Define a route
 app.get('/', (req, res) => {
@@ -122,6 +107,7 @@ app.get('/updateOrder/:orderId/:tracking', (req, res) => {
     }
   });
 });
+
 
 app.use('/getProfile', cors());
 app.get('/getProfile', (req, res) => {
@@ -309,25 +295,7 @@ app.post('/deleteOrders', (req, res) => {
   });
 });
 
-app.use('/login', cors());
-// Route for handling login
-app.post('/login', (req, res) => {
-  const { username, password } = req.body;
-  console.log('Login Called');
-  console.log(username, password);
-  // Query the database to check if the user exists
-  db.query('SELECT * FROM users WHERE username = ? AND password = ?', [username, password], (err, results) => {
-    if (err) {
-      console.error('Database error:', err);
-      res.status(500).json({ error: 'Database error' });
-    } else {
-      if (results.length === 1) {
-        // User exists and credentials are correct
-        res.status(200).json({ message: 'Login successful' });
-      } else {
-        // User doesn't exist or credentials are incorrect
-        res.status(401).json({ error: 'Authentication failed' });
-      }
-    }
-  });
+// Start the server
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
