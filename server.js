@@ -5,7 +5,6 @@ const path = require('path');
 const mysql = require('mysql');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const port = 3000;
 
 const db = mysql.createConnection({
   host: 'srv1086.hstgr.io',
@@ -18,8 +17,8 @@ const db = mysql.createConnection({
 const app = express();
 
 // Load SSL/TLS certificates
-const privateKey = fs.readFileSync(process.env.SSL_KEY_PATH, 'utf8');
-const certificate = fs.readFileSync(process.env.SSL_CERT_PATH, 'utf8');
+const privateKey = fs.readFileSync(process.env.SSL_KEY_PATH || '/etc/letsencrypt/live/sujathagold.com/fullchain.pem', 'utf8');
+const certificate = fs.readFileSync(process.env.SSL_CERT_PATH || '/etc/letsencrypt/live/sujathagold.com/privkey.pem', 'utf8');
 const credentials = { key: privateKey, cert: certificate };
 
 app.use('/', cors());
@@ -329,6 +328,6 @@ app.post('/login', (req, res) => {
 const httpsServer = https.createServer(credentials, app);
 
 // Start listening on port 3000 (HTTPS)
-httpsServer.listen(port, () => {
+httpsServer.listen(process.env.PORT || 3000, () => {
   console.log(`Server is running on port ${port} (HTTPS)`);
 });
