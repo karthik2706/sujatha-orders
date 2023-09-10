@@ -120,16 +120,17 @@
     e.preventDefault();
     var mobile = $trackingForm.find("[name=mobile]").val();
     $("#orderResults").removeClass("hide");
-    // var apiUrl = `https://www.sujathagold.com:3000/getOrdersByMobile/${mobile}`;
+    var apiUrl = `https://www.sujathagold.com:3000/getOrdersByMobile/${mobile}`;
 
-    $.ajax({
-      url: `https://www.sujathagold.com:3000/getOrdersByMobile/${mobile}`,
-      type: 'GET',
-      crossDomain: true,
-      dataType: 'jsonp'
-    }).done(function(data) {
-      console.log("Data: ", data);  
-      console.log(data);
+    fetch(apiUrl)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log(data);
         ordersData = data;
         // Process the data received from the server (list of orders with the specified mobile number)
         let parseData = [];
@@ -213,20 +214,9 @@
             },
           ],
         });
-    });
 
-    // fetch(apiUrl)
-    //   .then((response) => {
-    //     if (!response.ok) {
-    //       throw new Error('Network response was not ok');
-    //     }
-    //     return response.json();
-    //   })
-    //   .then((data) => {
-        
-
-    //     // renderOrders("trackingTable", filteredOrders, false);
-    //   });
+        // renderOrders("trackingTable", filteredOrders, false);
+      });
   })
 
         })
