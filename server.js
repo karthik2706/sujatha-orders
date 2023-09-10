@@ -21,6 +21,7 @@ const db = mysql.createConnection({
 const privateKey = fs.readFileSync('/etc/letsencrypt/live/sujathagold.com/fullchain.pem', 'utf8');
 const certificate = fs.readFileSync('/etc/letsencrypt/live/sujathagold.com/privkey.pem', 'utf8');
 const credentials = { key: privateKey, cert: certificate };
+console.log(credentials);
 
 // Create an HTTPS server
 const httpsServer = https.createServer(credentials, app);
