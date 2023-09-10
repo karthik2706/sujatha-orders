@@ -1,6 +1,6 @@
 
 
-var domain = '/omsServices';
+var domain = 'https://www.sujathagold.com:3000';
 
 //API keys variables
 var urlD = 'https://track.delhivery.com';

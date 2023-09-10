@@ -18,15 +18,6 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Define a route for the redirection
-app.get('/omsServices/*', (req, res) => {
-    // Get the wildcard path
-    const wildcardPath = req.params[0];
-
-    // Redirect to the target URL
-    res.redirect(`https://www.sujathagold.com:3000/${wildcardPath}`);
-});
-
 // Create an HTTPS server
 const httpsServer = https.createServer(credentials, app);
 
