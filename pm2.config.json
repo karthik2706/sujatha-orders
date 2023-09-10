@@ -1,18 +1,6 @@
 {
     "apps": [
       {
-        "name": "my-server",
-        "script": "server.js",
-        "instances": 1,
-        "exec_mode": "fork",
-        "env": {
-          "NODE_ENV": "production",
-          "PORT": 3000,
-          "SSL_CERT_PATH": "/etc/letsencrypt/live/sujathagold.com/fullchain.pem",
-          "SSL_KEY_PATH": "/etc/letsencrypt/live/sujathagold.com/privkey.pem"
-        }
-      },
-      {
         "name": "my-client",
         "script": "client.js",
         "instances": 1,
