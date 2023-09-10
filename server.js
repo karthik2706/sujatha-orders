@@ -7,7 +7,6 @@ const bodyParser = require('body-parser');
 
 
 const app = express();
-const port = 3000;
 
 const db = mysql.createConnection({
   host: 'srv1086.hstgr.io',
