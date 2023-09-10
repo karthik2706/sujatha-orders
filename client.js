@@ -30,6 +30,11 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// Define a route for the homepage
+app.get('/tracking', (req, res) => {
+    res.sendFile(path.join(__dirname, 'tracking.html'));
+});
+
 // Define a route
 app.get('/test', (req, res) => {
     res.send('Hello, Node.js server!');
