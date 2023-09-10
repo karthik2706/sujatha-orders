@@ -18,17 +18,17 @@ const db = mysql.createConnection({
 });
 
 // Load SSL/TLS certificates
-const privateKey = fs.readFileSync('/etc/letsencrypt/live/sujathagold.com/fullchain.pem', 'utf8');
-const certificate = fs.readFileSync('/etc/letsencrypt/live/sujathagold.com/privkey.pem', 'utf8');
+const privateKey = fs.readFileSync(process.env.SSL_KEY_PATH, 'utf8');
+const certificate = fs.readFileSync(process.env.SSL_CERT_PATH, 'utf8');
 const credentials = { key: privateKey, cert: certificate };
-console.log(credentials);
+
 
 // Create an HTTPS server
 const httpsServer = https.createServer(credentials, app);
 
-// Start listening on port 3000 (HTTPS)
-httpsServer.listen(port, () => {
-  console.log(`Server is running on port ${port} (HTTPS)`);
+// Start listening on the HTTPS port (443)
+httpsServer.listen(process.env.PORT || 443, () => {
+  console.log(`Server is running on port ${process.env.PORT || 443} (HTTPS)`);
 });
 
 // Define a route
