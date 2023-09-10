@@ -1,11 +1,11 @@
 const express = require('express');
 const mysql = require('mysql');
-
-const app = express();
-const port = 3000;
 const cors = require('cors'); // Import the 'cors' middleware
 const bodyParser = require('body-parser');
 
+
+const app = express();
+const port = 3000;
 
 const db = mysql.createConnection({
   host: 'srv1086.hstgr.io',
@@ -305,9 +305,4 @@ app.post('/deleteOrders', (req, res) => {
       res.json({ message: `${result.affectedRows} orders deleted successfully` });
     }
   });
-});
-
-// Start the server
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
 });
