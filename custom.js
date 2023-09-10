@@ -1,6 +1,6 @@
 
 
-var domain = 'https://www.sujathagold.com:3000';
+var domain = '';
 
 //API keys variables
 var urlD = 'https://track.delhivery.com';
