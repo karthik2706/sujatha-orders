@@ -7,13 +7,25 @@ const cors = require('cors'); // Import the 'cors' middleware
 const bodyParser = require('body-parser');
 
 
-
 const db = mysql.createConnection({
   host: 'srv1086.hstgr.io',
   user: 'u400549820_sujatha',
   password: 'Darling@2706',
   database: 'u400549820_sujatha_oms',
   keepAlive: true,
+});
+
+// Load SSL/TLS certificates
+const privateKey = fs.readFileSync('/etc/letsencrypt/live/sujathagold.com/fullchain.pem', 'utf8');
+const certificate = fs.readFileSync('/etc/letsencrypt/live/sujathagold.com/privkey.pem', 'utf8');
+const credentials = { key: privateKey, cert: certificate };
+
+// Create an HTTPS server
+const httpsServer = https.createServer(credentials, app);
+
+// Start listening on port 3000 (HTTPS)
+httpsServer.listen(port, () => {
+  console.log(`Server is running on port ${port} (HTTPS)`);
 });
 
 // Define a route
