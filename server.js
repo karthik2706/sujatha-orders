@@ -1,5 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
+const fs = require('fs');
 const cors = require('cors'); // Import the 'cors' middleware
 const bodyParser = require('body-parser');
 
