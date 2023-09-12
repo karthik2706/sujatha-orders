@@ -767,12 +767,11 @@ function printSlips(data) {
         generatePdf(orderData, index);
       })
       .catch(error => {
+        $('.printSlip').removeAttr('disabled');
         console.error('Error:', error);
       }); 
     }
   });
-
-  $(e.target).removeAttr("disabled");
 }
 
 //generate PDF
@@ -866,6 +865,7 @@ function generatePdf(data, index) {
       .from(element) //.save();
       .output("blob")
       .then(function (blob) {
+        $('.printSlip').removeAttr('disabled');
         let url = URL.createObjectURL(blob);
         window.open(url); //opens the pdf in a new tab
         // $printHtml.addClass("hide");
