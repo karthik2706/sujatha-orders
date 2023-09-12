@@ -8,13 +8,46 @@ const bodyParser = require('body-parser');
 
 const app = express();
 
-const db = mysql.createConnection({
+const dbConfig = {
   host: 'srv1086.hstgr.io',
   user: 'u400549820_sujatha',
   password: 'Darling@2706',
   database: 'u400549820_sujatha_oms',
   keepAlive: true,
-});
+};
+
+let db; // Declare the database connection object
+
+// Function to create a new database connection
+function createDbConnection() {
+  return mysql.createConnection(dbConfig);
+}
+
+// Function to periodically check and reconnect to the database
+function checkDbConnection() {
+  console.log('Checking MySQL database connection...');
+  db = createDbConnection(); // Create a new database connection
+
+  db.connect((err) => {
+    if (err) {
+      console.error('Error connecting to MySQL:', err);
+      // Handle the connection error here, e.g., retry or take appropriate action
+      // Retry connecting after a delay (e.g., 10 seconds)
+      setTimeout(() => {
+        console.log('Retrying database connection...');
+        checkDbConnection(); // Retry the database connection
+      }, 15000); // Retry after 10 seconds
+    } else {
+      console.log('Connected to MySQL database');
+    }
+  });
+
+  // Schedule the next check after 2 minutes (120,000 milliseconds)
+  setTimeout(checkDbConnection, 120000);
+}
+
+// Start the initial database connection check
+checkDbConnection();
 
 // Load SSL/TLS certificates
 // const privateKey = fs.readFileSync(process.env.SSL_KEY_PATH, 'utf8');
