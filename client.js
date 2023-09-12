@@ -3,7 +3,7 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const mysql = require('mysql');
-
+const cors = require('cors'); // Import the 'cors' middleware
 const app = express();
 const bodyParser = require('body-parser');
 
