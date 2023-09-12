@@ -39,7 +39,7 @@ app.get('/tracking', (req, res) => {
 app.get('/test', (req, res) => {
     res.send('Hello, Node.js server!');
 });
-
+app.use('/getProfile', cors());
 app.get('/getProfile', (req, res) => {
     console.log('getProfile called');
     // Establish a connection to the database and execute SQL queries here
@@ -52,7 +52,7 @@ app.get('/getProfile', (req, res) => {
         }
     });
 });
-
+app.use('/getOrders', cors());
 app.get('/getOrders', (req, res) => {
     console.log('getOrders called');
     // Establish a connection to the database and execute SQL queries here
@@ -65,7 +65,7 @@ app.get('/getOrders', (req, res) => {
         }
     });
 });
-
+app.use('/getOrder', cors());
 // Define a route to get an order by ID
 app.get('/getOrder/:orderId', (req, res) => {
     // Extract the orderId from the URL parameters
@@ -87,7 +87,7 @@ app.get('/getOrder/:orderId', (req, res) => {
         }
     });
 });
-
+app.use('/updateOrder', cors());
 // Define a route to get an order by ID
 app.get('/updateOrder/:orderId/:tracking', (req, res) => {
     // Extract the orderId from the URL parameters
@@ -130,7 +130,7 @@ app.get('/updateOrder/:orderId/:tracking', (req, res) => {
         }
     });
 });
-
+app.use('/createOrder', cors());
 app.post('/createOrder', (req, res) => {
     const ordersData = [];
     var orderid;
@@ -187,6 +187,7 @@ app.post('/createOrder', (req, res) => {
     });
 });
 
+app.use('/getOrdersByMobile', cors());
 app.get('/getOrdersByMobile/:mobile', (req, res) => {
     const mobileNumber = req.params.mobile; // Get the mobile number from the URL parameter
     console.log(mobileNumber)
@@ -204,6 +205,7 @@ app.get('/getOrdersByMobile/:mobile', (req, res) => {
     });
 });
 
+app.use('/updateOrderDetails', cors());
 app.put('/updateOrderDetails/:id', (req, res) => {
     const orderId = req.params.id; // Get the order ID from the URL parameter
 
@@ -273,6 +275,7 @@ app.put('/updateOrderDetails/:id', (req, res) => {
     });
 });
 
+app.use('/deleteOrders', cors());
 // Create an API endpoint to delete multiple entries by IDs
 app.post('/deleteOrders', (req, res) => {
     const idsToDelete = req.body; // An array of order IDs to delete
@@ -295,6 +298,7 @@ app.post('/deleteOrders', (req, res) => {
     });
 });
 
+app.use('/login', cors());
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
     console.log('Login Called');
