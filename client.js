@@ -325,6 +325,6 @@ app.post('/login', (req, res) => {
 // });
 
 // Start listening on the HTTP port (80)
-app.listen(process.env.PORT || 80, () => {
+app.listen(process.env.PORT || 8080, () => {
     console.log(`Server is running on port ${process.env.PORT || 80} (HTTP)`);
 });
