@@ -47,11 +47,17 @@ function checkDbConnection() {
 };
 
 function closeConnection() {
-  db.end((endError) => {
-    if (endError) {
-      console.error('Error closing the database connection:', endError);
+  db.connect((err) => {
+    if (err) {
+      console.error('No active connection', err);
     } else {
-      console.log('Database connection closed.');
+      db.end((endError) => {
+        if (endError) {
+          console.error('Error closing the database connection:', endError);
+        } else {
+          console.log('Database connection closed.');
+        }
+      });
     }
   });
 }
