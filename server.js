@@ -97,9 +97,10 @@ app.get('/getOrders', (req, res) => {
       res.status(500).json({ error: 'Database error' });
     } else {
       res.json(results);
+      closeConnection();
     }
   });
-  closeConnection();
+  
 });
 
 app.use('/getOrder/:orderId', cors());
@@ -107,7 +108,7 @@ app.use('/getOrder/:orderId', cors());
 // Define a route to get an order by ID
 app.get('/getOrder/:orderId', (req, res) => {
   // Start the initial database connection check
-checkDbConnection();
+  checkDbConnection();
   // Extract the orderId from the URL parameters
   const orderId = req.params.orderId;
   console.log('orderId is', orderId);
@@ -123,10 +124,10 @@ checkDbConnection();
       } else {
         // Send the order data as JSON response
         res.json(results[0]); // Assuming there's only one order with the given ID
+        closeConnection();
       }
     }
   });
-  closeConnection();
 });
 
 app.use('/updateOrder/:orderId', cors());
@@ -160,12 +161,13 @@ app.get('/updateOrder/:orderId/:tracking', (req, res) => {
             res.status(500).json({ error: 'Database update error' });
           } else {
             res.json({ message: 'Order updated successfully' });
+            closeConnection();
           }
         });
       }
     }
   });
-  closeConnection();
+
 });
 
 
@@ -180,9 +182,9 @@ app.get('/getProfile', (req, res) => {
       res.status(500).json({ error: 'Database error' });
     } else {
       res.json(results[0]);
+      closeConnection();
     }
   });
-  closeConnection();
 });
 
 app.use('/createOrder', cors());
@@ -252,9 +254,10 @@ app.get('/getOrdersByMobile/:mobile', (req, res) => {
       res.status(500).json({ error: 'Database error' });
     } else {
       res.json(results);
+      closeConnection();
     }
   });
-  closeConnection();
+  
 });
 
 
@@ -326,10 +329,11 @@ app.put('/updateOrderDetails/:id', (req, res) => {
     } else {
       console.log('Order updated successfully');
       res.json(results);
+      closeConnection();
     }
   });
 
-  closeConnection();
+  
 });
 
 app.use('/login', cors());
@@ -376,10 +380,11 @@ app.post('/deleteOrders', (req, res) => {
       res.status(500).json({ error: 'Database error' });
     } else {
       res.json({ message: `${result.affectedRows} orders deleted successfully` });
+      // closeConnection();
     }
   });
 
-  closeConnection()
+
 });
 
 // Start listening on the HTTP port (80)
