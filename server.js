@@ -158,6 +158,7 @@ app.get('/updateOrder/:orderId/:tracking', (req, res) => {
 
 app.use('/getProfile', cors());
 app.get('/getProfile', (req, res) => {
+  checkDbConnection();
   console.log('getProfile called');
   // Establish a connection to the database and execute SQL queries here
   db.query('SELECT * FROM profile', (error, results) => {
@@ -172,6 +173,7 @@ app.get('/getProfile', (req, res) => {
 
 app.use('/createOrder', cors());
 app.post('/createOrder', (req, res)=> {
+  checkDbConnection();
   const ordersData = [];
   var orderid;
   ordersData.push(req.body); // Access the data sent in the request body
@@ -230,6 +232,7 @@ app.post('/createOrder', (req, res)=> {
 app.use('/getOrdersByMobile/:mobile', cors());
 // Define a route to fetch orders based on 'mobile'
 app.get('/getOrdersByMobile/:mobile', (req, res) => {
+  checkDbConnection();
   const mobileNumber = req.params.mobile; // Get the mobile number from the URL parameter
   console.log(mobileNumber)
   // Construct an SQL query to fetch orders with the specified mobile number
@@ -250,6 +253,7 @@ app.get('/getOrdersByMobile/:mobile', (req, res) => {
 app.use('/updateOrderDetails/:id', cors());
 // Define a route to update an order by ID
 app.put('/updateOrderDetails/:id', (req, res) => {
+  checkDbConnection();
   const orderId = req.params.id; // Get the order ID from the URL parameter
 
   // Retrieve the updated order data from the request body
@@ -329,6 +333,7 @@ app.put('/updateOrderDetails/:id', (req, res) => {
 
 app.use('/login', cors());
 app.post('/login', (req, res) => {
+  checkDbConnection();
     const { username, password } = req.body;
     console.log('Login Called');
     console.log(username, password);
@@ -353,6 +358,7 @@ app.use('/deleteOrders', cors());
 
 // Create an API endpoint to delete multiple entries by IDs
 app.post('/deleteOrders', (req, res) => {
+  checkDbConnection();
   const idsToDelete = req.body; // An array of order IDs to delete
   console.log(idsToDelete);
   if (!Array.isArray(idsToDelete) || idsToDelete.length === 0) {
@@ -369,6 +375,15 @@ app.post('/deleteOrders', (req, res) => {
       res.status(500).json({ error: 'Database error' });
     } else {
       res.json({ message: `${result.affectedRows} orders deleted successfully` });
+    }
+  });
+
+  // Close the database connection
+  db.end((endError) => {
+    if (endError) {
+      console.error('Error closing the database connection:', endError);
+    } else {
+      console.log('Database connection closed.');
     }
   });
 });
