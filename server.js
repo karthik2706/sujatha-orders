@@ -217,13 +217,13 @@ app.post('/createOrder', (req, res)=> {
     });
 
     // Close the database connection
-    // db.end((endError) => {
-    //   if (endError) {
-    //     console.error('Error closing the database connection:', endError);
-    //   } else {
-    //     console.log('Database connection closed.');
-    //   }
-    // });
+    db.end((endError) => {
+      if (endError) {
+        console.error('Error closing the database connection:', endError);
+      } else {
+        console.log('Database connection closed.');
+      }
+    });
   });
 });
 
@@ -314,6 +314,15 @@ app.put('/updateOrderDetails/:id', (req, res) => {
     } else {
       console.log('Order updated successfully');
       res.json(results);
+    }
+  });
+
+  // Close the database connection
+  db.end((endError) => {
+    if (endError) {
+      console.error('Error closing the database connection:', endError);
+    } else {
+      console.log('Database connection closed.');
     }
   });
 });
