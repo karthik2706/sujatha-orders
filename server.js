@@ -103,6 +103,29 @@ app.get('/getOrders', (req, res) => {
   
 });
 
+app.use('/getOrdersById', cors());
+app.post('/getOrdersById', (req, res) => {
+  console.log('called getOrdersById');
+  checkDbConnection();
+  // Get the list of order IDs from the request query parameters
+  const orderIds = req.body.orderIds;
+  console.log(orderIds, Array.isArray(orderIds), orderIds.length);
+  if (!orderIds || !Array.isArray(orderIds) || orderIds.length === 0) {
+    return res.status(400).json({ error: 'Invalid or empty order IDs' });
+  }
+
+  // Establish a connection to the database and execute SQL query to fetch orders by IDs
+  db.query('SELECT * FROM orders WHERE id IN (?)', [orderIds], (error, results) => {
+    if (error) {
+      console.error('Database error:', error);
+      return res.status(500).json({ error: 'Database error' });
+    } else {
+      res.json(results);
+      closeConnection();
+    }
+  });
+});
+
 app.use('/getOrder/:orderId', cors());
 
 // Define a route to get an order by ID
@@ -124,7 +147,7 @@ app.get('/getOrder/:orderId', (req, res) => {
       } else {
         // Send the order data as JSON response
         res.json(results[0]); // Assuming there's only one order with the given ID
-        // closeConnection();
+        closeConnection();
       }
     }
   });

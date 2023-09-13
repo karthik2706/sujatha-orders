@@ -1,6 +1,6 @@
 
 
-var domain = 'http://sujathagold.com:8080';
+var domain = 'http://www.sujathagold.com:8080';
 
 //API keys variables
 var urlD = 'https://track.delhivery.com';
@@ -755,23 +755,37 @@ function printSlips(data) {
   countSlips = data.length;
   $printHtml = $("#bulk-to-print").html("");
   $printHtml.removeClass("hide");
-
+  var orders = [];
   $(data).each(function (index, val) {
     var orderId = val;
     var orderData;
     if(orderId) {
-      fetch(`${domain}/getOrder/${orderId}`)
+      orders.push(orderId);
+    } else {
+      return;
+    }
+  });
+   // console.log(data);
+   fetch(`${domain}/getOrdersById`, {
+    method: 'POST', // Specify the HTTP method
+    headers: {
+      'Content-Type': 'application/json', // Set the content type to JSON
+    },
+    body: JSON.stringify({orderIds : orders}), // Convert the data to JSON format
+  })
       .then(response => response.json())
       .then(data => {
         var orderData = data;
-        generatePdf(orderData, index);
+        console.log(orderData);
+        $(orderData).each(function(index, val){
+          generatePdf(val, index);
+        });
+        //generatePdf(orderData, index);
       })
       .catch(error => {
         $('.printSlip').removeAttr('disabled');
         console.error('Error:', error);
-      }); 
-    }
-  });
+      });
 }
 
 //generate PDF
@@ -839,7 +853,6 @@ function generatePdf(data, index) {
       );
   }
 
-
   $printHtml.append($pageBreak);
 
   $('.barcode-track').each(function () {
@@ -868,7 +881,7 @@ function generatePdf(data, index) {
         $('.printSlip').removeAttr('disabled');
         let url = URL.createObjectURL(blob);
         window.open(url); //opens the pdf in a new tab
-        // $printHtml.addClass("hide");
+        $printHtml.addClass("hide");
       });
   }
 }
