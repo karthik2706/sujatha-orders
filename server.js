@@ -124,7 +124,7 @@ app.get('/getOrder/:orderId', (req, res) => {
       } else {
         // Send the order data as JSON response
         res.json(results[0]); // Assuming there's only one order with the given ID
-        closeConnection();
+        // closeConnection();
       }
     }
   });
