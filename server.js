@@ -43,11 +43,18 @@ function checkDbConnection() {
   });
 
   // Schedule the next check after 2 minutes (120,000 milliseconds)
-  setTimeout(checkDbConnection, 120000);
-}
+  // setTimeout(checkDbConnection, 120000);
+};
 
-// Start the initial database connection check
-checkDbConnection();
+function closeConnection() {
+  db.end((endError) => {
+    if (endError) {
+      console.error('Error closing the database connection:', endError);
+    } else {
+      console.log('Database connection closed.');
+    }
+  });
+}
 
 // Load SSL/TLS certificates
 // const privateKey = fs.readFileSync(process.env.SSL_KEY_PATH, 'utf8');
@@ -74,6 +81,8 @@ app.use('/getOrders', cors());
 app.use(bodyParser.json());
 
 app.get('/getOrders', (req, res) => {
+  // Start the initial database connection check
+  checkDbConnection();
   console.log('getOrders called');
   // Establish a connection to the database and execute SQL queries here
   db.query('SELECT * FROM orders', (error, results) => {
@@ -84,12 +93,15 @@ app.get('/getOrders', (req, res) => {
       res.json(results);
     }
   });
+  closeConnection();
 });
 
 app.use('/getOrder/:orderId', cors());
 
 // Define a route to get an order by ID
 app.get('/getOrder/:orderId', (req, res) => {
+  // Start the initial database connection check
+checkDbConnection();
   // Extract the orderId from the URL parameters
   const orderId = req.params.orderId;
   console.log('orderId is', orderId);
@@ -108,12 +120,14 @@ app.get('/getOrder/:orderId', (req, res) => {
       }
     }
   });
+  closeConnection();
 });
 
 app.use('/updateOrder/:orderId', cors());
 
 // Define a route to get an order by ID
 app.get('/updateOrder/:orderId/:tracking', (req, res) => {
+  checkDbConnection();
   // Extract the orderId from the URL parameters
   const orderId = req.params.orderId;
   const updatedField = req.params.tracking;
@@ -142,17 +156,10 @@ app.get('/updateOrder/:orderId/:tracking', (req, res) => {
             res.json({ message: 'Order updated successfully' });
           }
         });
-
-        // db.end((endError) => {
-        //   if (endError) {
-        //     console.error('Error closing the database connection:', endError);
-        //   } else {
-        //     console.log('Database connection closed.');
-        //   }
-        // });
       }
     }
   });
+  closeConnection();
 });
 
 
@@ -169,6 +176,7 @@ app.get('/getProfile', (req, res) => {
       res.json(results[0]);
     }
   });
+  closeConnection();
 });
 
 app.use('/createOrder', cors());
@@ -218,14 +226,7 @@ app.post('/createOrder', (req, res)=> {
       }
     });
 
-    // Close the database connection
-    db.end((endError) => {
-      if (endError) {
-        console.error('Error closing the database connection:', endError);
-      } else {
-        console.log('Database connection closed.');
-      }
-    });
+    closeConnection();
   });
 });
 
@@ -247,6 +248,7 @@ app.get('/getOrdersByMobile/:mobile', (req, res) => {
       res.json(results);
     }
   });
+  closeConnection();
 });
 
 
@@ -321,14 +323,7 @@ app.put('/updateOrderDetails/:id', (req, res) => {
     }
   });
 
-  // Close the database connection
-  db.end((endError) => {
-    if (endError) {
-      console.error('Error closing the database connection:', endError);
-    } else {
-      console.log('Database connection closed.');
-    }
-  });
+  closeConnection();
 });
 
 app.use('/login', cors());
@@ -378,14 +373,7 @@ app.post('/deleteOrders', (req, res) => {
     }
   });
 
-  // Close the database connection
-  db.end((endError) => {
-    if (endError) {
-      console.error('Error closing the database connection:', endError);
-    } else {
-      console.log('Database connection closed.');
-    }
-  });
+  closeConnection()
 });
 
 // Start listening on the HTTP port (80)
