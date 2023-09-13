@@ -127,7 +127,7 @@ app.use('/updateOrder/:orderId', cors());
 
 // Define a route to get an order by ID
 app.get('/updateOrder/:orderId/:tracking', (req, res) => {
-  checkDbConnection();
+  // checkDbConnection();
   // Extract the orderId from the URL parameters
   const orderId = req.params.orderId;
   const updatedField = req.params.tracking;
@@ -226,7 +226,7 @@ app.post('/createOrder', (req, res)=> {
       }
     });
 
-    closeConnection();
+    // closeConnection();
   });
 });
 
