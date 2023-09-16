@@ -23,6 +23,26 @@ function createDbConnection() {
   return mysql.createConnection(dbConfig);
 }
 
+function formatDate(date) {
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  return `${day}-${month}-${year}`;
+}
+
+function getDateRange(startDate, endDate) {
+  const dateArray = [];
+  const currentUTCDate = new Date(startDate);
+  const endUTCDate = new Date(endDate);
+
+  while (currentUTCDate <= endUTCDate) {
+    dateArray.push(formatDate(currentUTCDate));
+    currentUTCDate.setUTCDate(currentUTCDate.getUTCDate() + 1);
+  }
+
+  return dateArray;
+}
+
 // Function to periodically check and reconnect to the database
 function checkDbConnection() {
   console.log('Checking MySQL database connection...');
@@ -125,6 +145,37 @@ app.post('/getOrdersById', (req, res) => {
     }
   });
 });
+
+app.use('/getOrdersBetweenDates', cors());
+
+app.post('/getOrdersBetweenDates', (req, res) => {
+  console.log('called getOrdersBetweenDates');
+  checkDbConnection();
+ 
+  // Get the start date and end date from the request body
+  const startDate = req.body.dates.startDate;
+  const endDate = req.body.dates.endDate;
+
+  if (!startDate || !endDate) {
+    return res.status(400).json({ error: 'Start date and end date are required' });
+  }
+
+  const datesArray = getDateRange(startDate, endDate);
+  console.log(datesArray);
+
+  // Establish a connection to the database and execute SQL query to fetch orders by IDs
+  db.query('SELECT * FROM orders WHERE time IN (?)', [datesArray], (error, results) => {
+    if (error) {
+      console.error('Database error:', error);
+      return res.status(500).json({ error: 'Database error' });
+      closeConnection();
+    } else {
+      res.json(results);
+      closeConnection();
+    }
+  });
+});
+
 
 app.use('/getOrder/:orderId', cors());
 

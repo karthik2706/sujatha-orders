@@ -546,6 +546,12 @@ $(document).ready(function () {
 
   $("#exportOrder").submit(function (event) {
     event.preventDefault();
+
+    if ($.fn.DataTable.isDataTable("#exportTable")) {
+      $("#exportTable")
+        .dataTable()
+        .fnDestroy();
+    }
     fetchTableOrders(this, "exportTable");
   });
 
@@ -557,20 +563,41 @@ $(document).ready(function () {
   //Export orders table
   function fetchTableOrders(order, table) {
     var filters = {};
+    var dates = {};
     $(order)
       .find(":input")
       .not("button")
       .each(function () {
         filters[this.name] = $(this).val();
       });
+      dates.startDate = new Date(formateDate(filters.fromdatepicker));
+  
+      if (formateDate(filters.todatepicker) == "null") {
+        dates.endDate = new Date(formateDate(filters.fromdatepicker));
+      } else {
+        dates.endDate = new Date(formateDate(filters.todatepicker));
+      }
+
+      
 
     // This code runs in the user's browser
-    fetch(`${domain}/getOrders`)
+    fetch(`${domain}/getOrdersBetweenDates`, {
+      method: 'POST', // Specify the HTTP method
+      headers: {
+        'Content-Type': 'application/json', // Set the content type to JSON
+      },
+      body: JSON.stringify({dates}), // Convert the data to JSON format
+    })
       .then(response => response.json())
       .then(data => {
         // Process the data received from the server
         ordersData = data;
-        fetchOrderFunc(ordersData, table, filters);
+        // console.log(ordersData);
+        if(ordersData.error) {
+          console.log('Error on fetching orders');
+        } else {
+          fetchOrderFunc(ordersData, table, filters);
+        }
         $loading.removeClass('show').addClass('hide');
       })
       .catch(error => {
@@ -583,32 +610,14 @@ $(document).ready(function () {
   function fetchOrderFunc(ordersData, table, filters) {
     let parseData = ordersData;
 
+    console.log(parseData);
+
     var filteredOrders = parseData.filter(function (order) {
       return order.vendor == filters.vendor && !order.isDispatched;
     });
 
-    var startDate = new Date(formateDate(filters.fromdatepicker));
-    var endDate;
-
-    if (formateDate(filters.todatepicker) == "null") {
-      endDate = new Date(formateDate(filters.fromdatepicker));
-    } else {
-      endDate = new Date(formateDate(filters.todatepicker));
-    }
-
-    var resultProductData = filteredOrders.filter(function (order) {
-      var date = new Date(formateDate(order.time));
-      return date >= startDate && date <= endDate;
-    });
-
-    if ($.fn.DataTable.isDataTable("#" + table)) {
-      $("#" + table)
-        .dataTable()
-        .fnDestroy();
-    }
-
-    exportData = resultProductData;
-    renderOrders(table, resultProductData, false);
+    exportData = filteredOrders;
+    renderOrders(table, filteredOrders, false);
   }
 
   $(".bulkBtn").click(function (e) {
