@@ -298,17 +298,17 @@ function renderOrders(div, data, isParse) {
         data: "tracking",
         className: "trackingClass",
       },
-      {
-        title: "Order Status", width: "15%", data: "orderStatus",
-        className: "statusClass",
-        render: function (data) {
-          var orderStatus = "Unknown";
-          if (data) {
-            orderStatus = data;
-          }
-          return orderStatus;
-        }
-      },
+      // {
+      //   title: "Order Status", width: "15%", data: "orderStatus",
+      //   className: "statusClass",
+      //   render: function (data) {
+      //     var orderStatus = "Unknown";
+      //     if (data) {
+      //       orderStatus = data;
+      //     }
+      //     return orderStatus;
+      //   }
+      // },
     ],
   });
 }
