@@ -111,7 +111,7 @@ app.get('/getOrders', (req, res) => {
   checkDbConnection();
   console.log('getOrders called');
   // Establish a connection to the database and execute SQL queries here
-  db.query('SELECT * FROM orders LIMIT 1500', (error, results) => {
+  db.query('SELECT * FROM orders ORDER BY time DESC LIMIT 1500', (error, results) => {
     if (error) {
       console.error('Database error:', error);
       res.status(500).json({ error: 'Database error' });
