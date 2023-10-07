@@ -6,8 +6,8 @@ var domain = 'http://www.sujathagold.com:8080';
 var urlD = 'https://track.delhivery.com';
 var clientKeyD = '52f81411e7185b24602a6b2b4b52ac491ed00a24';
 var clientName = 'SUJATHAFRANCHISE';
-var clientKeyDNew = 'c5b56fa680db359aae2c36e41ce64bc3b82fac7d';
-var clientNameNew = 'HRENTERPRISESFRANCHISE';
+var clientKeyDNew = '6400adffc23c276166236560357634ca08415d7e';
+var clientNameNew = 'VIJAYA LOGISTICS';
 
 let ordersData;
 let fecthDataOrders;
@@ -1057,7 +1057,7 @@ function generateXL(type, data) {
         SellerGSTTIN: "",
         HSNCode: "",
         ReturnReason: "",
-        VendorPickupLocation: (type == '2') ? value.pickupD : "Sujatha Fashion Jewellery",
+        VendorPickupLocation: value.pickupD || "SUJATHA FRANCHISE",
         EWBN: "",
       });
     });
