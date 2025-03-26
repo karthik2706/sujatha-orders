@@ -17,9 +17,14 @@ let profileData;
 function createOrder(orderData) {
   var newElementSuccess = $('<p>Order Successfully Created</p>');
   var newElementFailure = $('<p style="color:red;">Order Failed, Please try again</p>');
-  // console.log(data);
+  console.log('Create Order Clicked');
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+  // Set a timeout to abort the request after 3 seconds
+  const timeoutId = setTimeout(() => {
+    controller.abort(); // This will cancel the fetch
+    console.warn('Request aborted due to timeout');
+  }, 3000);
 
   fetch(`${domain}/createOrder`, {
     method: 'POST', // Specify the HTTP method
@@ -28,13 +33,16 @@ function createOrder(orderData) {
     },
     body: JSON.stringify(orderData.fields), // Convert the data to JSON format
     signal: controller.signal, // Attach the abort signal
-    })
+  })
     .then(response => {
-      clearTimeout(timeoutId); // Clear the timeout if the call succeeds
+      clearTimeout(timeoutId); // Clear timeout if the request succeeded
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
       return response.json();
     })
     .then(data => {
-      // console.log('Response:', data);
+      console.log('Create Order Response:', data);
       // Process the response data
       orderSumitted(orderData, data.insertId);
       $('form#createOrder')[0].reset();
@@ -44,10 +52,11 @@ function createOrder(orderData) {
       }, 3000);
     })
     .catch(error => {
+      console.log('Create Order Error');
       if (error.name === 'AbortError') {
-      console.error('Error: Request timed out');
+        console.error('Error: Request timed out');
       } else {
-      console.error('Error:', error);
+        console.error('Error:', error);
       }
       newElementFailure.insertAfter('.OrderSubmit');
       setTimeout(function () {
@@ -56,10 +65,10 @@ function createOrder(orderData) {
     });
 }
 
-  //Mark as dispatched
-  function deleteOrders(data, e) {
-    var tableId = $(e.target).closest('.tab-pane').attr('id');
-    fetch(`${domain}/deleteOrders`, {
+//Mark as dispatched
+function deleteOrders(data, e) {
+  var tableId = $(e.target).closest('.tab-pane').attr('id');
+  fetch(`${domain}/deleteOrders`, {
     method: 'POST', // Specify the HTTP method
     headers: {
       'Content-Type': 'application/json', // Set the content type to JSON
@@ -74,9 +83,9 @@ function createOrder(orderData) {
     })
     .catch(error => {
       console.error('Error:', error);
-    });  
-    $(e.target).removeAttr("disabled");
-  }
+    });
+  $(e.target).removeAttr("disabled");
+}
 
 
 function fetchProfile() {
@@ -356,7 +365,7 @@ $(document).ready(function () {
   $loading = $(".loading");
   // fetchOrders("example");
 
-  $('.loginBtn').on('click', function(e){
+  $('.loginBtn').on('click', function (e) {
     e.preventDefault();
     var $this = $('#loginUser');
     var username = $this.find('.username').val();
@@ -581,15 +590,15 @@ $(document).ready(function () {
       .each(function () {
         filters[this.name] = $(this).val();
       });
-      dates.startDate = new Date(formateDate(filters.fromdatepicker));
-  
-      if (formateDate(filters.todatepicker) == "null") {
-        dates.endDate = new Date(formateDate(filters.fromdatepicker));
-      } else {
-        dates.endDate = new Date(formateDate(filters.todatepicker));
-      }
+    dates.startDate = new Date(formateDate(filters.fromdatepicker));
 
-      
+    if (formateDate(filters.todatepicker) == "null") {
+      dates.endDate = new Date(formateDate(filters.fromdatepicker));
+    } else {
+      dates.endDate = new Date(formateDate(filters.todatepicker));
+    }
+
+
 
     // This code runs in the user's browser
     fetch(`${domain}/getOrdersBetweenDates`, {
@@ -597,14 +606,14 @@ $(document).ready(function () {
       headers: {
         'Content-Type': 'application/json', // Set the content type to JSON
       },
-      body: JSON.stringify({dates}), // Convert the data to JSON format
+      body: JSON.stringify({ dates }), // Convert the data to JSON format
     })
       .then(response => response.json())
       .then(data => {
         // Process the data received from the server
         ordersData = data;
         // console.log(ordersData);
-        if(ordersData.error) {
+        if (ordersData.error) {
           console.log('Error on fetching orders');
         } else {
           fetchOrderFunc(ordersData, table, filters);
@@ -779,33 +788,33 @@ function printSlips(data) {
   $(data).each(function (index, val) {
     var orderId = val;
     var orderData;
-    if(orderId) {
+    if (orderId) {
       orders.push(orderId);
     } else {
       return;
     }
   });
-   // console.log(data);
-   fetch(`${domain}/getOrdersById`, {
+  // console.log(data);
+  fetch(`${domain}/getOrdersById`, {
     method: 'POST', // Specify the HTTP method
     headers: {
       'Content-Type': 'application/json', // Set the content type to JSON
     },
-    body: JSON.stringify({orderIds : orders}), // Convert the data to JSON format
+    body: JSON.stringify({ orderIds: orders }), // Convert the data to JSON format
   })
-      .then(response => response.json())
-      .then(data => {
-        var orderData = data;
-        console.log(orderData);
-        $(orderData).each(function(index, val){
-          generatePdf(val, index);
-        });
-        //generatePdf(orderData, index);
-      })
-      .catch(error => {
-        $('.printSlip').removeAttr('disabled');
-        console.error('Error:', error);
+    .then(response => response.json())
+    .then(data => {
+      var orderData = data;
+      console.log(orderData);
+      $(orderData).each(function (index, val) {
+        generatePdf(val, index);
       });
+      //generatePdf(orderData, index);
+    })
+    .catch(error => {
+      $('.printSlip').removeAttr('disabled');
+      console.error('Error:', error);
+    });
 }
 
 //generate PDF
@@ -881,9 +890,9 @@ function generatePdf(data, index) {
     $this.JsBarcode(tracking);
   });
 
-  console.log(countSlips, index+1, $printHtml.height());
-  if (index+1 === countSlips) {
-    
+  console.log(countSlips, index + 1, $printHtml.height());
+  if (index + 1 === countSlips) {
+
     // $printHtml.css('height', $printHtml.height() * 1.25);
     var element = $printHtml[0];
     var opt = {
