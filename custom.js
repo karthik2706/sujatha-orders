@@ -16,16 +16,23 @@ let profileData;
 
 function createOrder(orderData) {
   var newElementSuccess = $('<p>Order Successfully Created</p>');
-  var newElementFailure = $('<p>Order Failed, Please try again</p>');
+  var newElementFailure = $('<p style="color:red;">Order Failed, Please try again</p>');
   // console.log(data);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 3000);
+
   fetch(`${domain}/createOrder`, {
     method: 'POST', // Specify the HTTP method
     headers: {
       'Content-Type': 'application/json', // Set the content type to JSON
     },
     body: JSON.stringify(orderData.fields), // Convert the data to JSON format
-  })
-    .then(response => response.json())
+    signal: controller.signal, // Attach the abort signal
+    })
+    .then(response => {
+      clearTimeout(timeoutId); // Clear the timeout if the call succeeds
+      return response.json();
+    })
     .then(data => {
       // console.log('Response:', data);
       // Process the response data
@@ -37,7 +44,11 @@ function createOrder(orderData) {
       }, 3000);
     })
     .catch(error => {
+      if (error.name === 'AbortError') {
+      console.error('Error: Request timed out');
+      } else {
       console.error('Error:', error);
+      }
       newElementFailure.insertAfter('.OrderSubmit');
       setTimeout(function () {
         newElementFailure.remove(); // Remove the new element
