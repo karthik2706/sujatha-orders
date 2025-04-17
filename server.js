@@ -8,11 +8,21 @@ const bodyParser = require('body-parser');
 
 const app = express();
 
+// This is actual one
+// const dbConfig = {
+//   host: 'srv1086.hstgr.io',
+//   user: 'u400549820_sujatha',
+//   password: 'Darling@2706',
+//   database: 'u400549820_sujatha_oms',
+//   keepAlive: true,
+// };
+
+//This is backup one
 const dbConfig = {
   host: 'srv1086.hstgr.io',
-  user: 'u400549820_sujatha',
+  user: 'u400549820_sujatha_backup',
   password: 'Darling@2706',
-  database: 'u400549820_sujatha_oms',
+  database: 'u400549820_sujatha_backup',
   keepAlive: true,
 };
 
