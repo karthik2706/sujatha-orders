@@ -18,11 +18,20 @@ const app = express();
 // };
 
 //This is backup one
+// const dbConfig = {
+//   host: 'srv1086.hstgr.io',
+//   user: 'u400549820_sujatha_backup',
+//   password: 'Darling@2706',
+//   database: 'u400549820_sujatha_backup',
+//   keepAlive: true,
+// };
+
+//This is backup two
 const dbConfig = {
   host: 'srv1086.hstgr.io',
-  user: 'u400549820_sujatha_backup',
+  user: 'u400549820_sujatha_back2',
   password: 'Darling@2706',
-  database: 'u400549820_sujatha_backup',
+  database: 'u400549820_sujatha_back2',
   keepAlive: true,
 };
 
