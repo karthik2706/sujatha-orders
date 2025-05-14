@@ -415,6 +415,10 @@ app.put('/updateOrderDetails/:id', (req, res) => {
   
 });
 
+app.get('/login-test', (req, res) => {
+  res.send('Login Test page working!');
+});
+
 app.use('/login', cors());
 app.post('/login', (req, res) => {
   checkDbConnection();
