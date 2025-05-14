@@ -1,6 +1,4 @@
-
-
-var domain = '';
+var domain = 'https://sujathagold.com ';
 
 //API keys variables
 var urlD = 'https://track.delhivery.com';
