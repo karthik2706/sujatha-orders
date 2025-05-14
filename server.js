@@ -466,7 +466,7 @@ app.post('/deleteOrders', (req, res) => {
 
 });
 
-// Start listening on the HTTP port (80)
+// Start listening on the HTTP port (8080)
 app.listen(process.env.PORT || 8080, () => {
   console.log(`Server is running on port ${process.env.PORT || 8080} (HTTP)`);
 });
