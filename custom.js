@@ -1,6 +1,6 @@
 
 
-var domain = '//www.sujathagold.com:443';
+var domain = 'https://www.sujathagold.com:443';
 
 //API keys variables
 var urlD = 'https://track.delhivery.com';
