@@ -1,6 +1,6 @@
 
 
-var domain = 'https://www.sujathagold.com';
+var domain = '//www.sujathagold.com';
 
 //API keys variables
 var urlD = 'https://track.delhivery.com';
@@ -795,7 +795,7 @@ function printSlips(data) {
     }
   });
   // console.log(data);
-  fetch(`${domain}/getOrdersById`, {
+  fetch(`${domain}/2Id`, {
     method: 'POST', // Specify the HTTP method
     headers: {
       'Content-Type': 'application/json', // Set the content type to JSON
