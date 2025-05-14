@@ -481,11 +481,7 @@ app.post('/deleteOrders', (req, res) => {
 });
 
 // Start listening on the HTTP port (80)
-app.listen(process.env.PORT || 443, () => {
-  console.log(`Server is running on port ${process.env.PORT || 443} (HTTPS)`);
+app.listen(process.env.PORT || 8080, () => {
+  console.log(`Server is running on port ${process.env.PORT || 8080} (HTTP)`);
 });
 
-// // Start listening on the HTTPS port (443)
-// httpsServer.listen(process.env.PORT || 443, () => {
-//   console.log(`Server is running on port ${process.env.PORT || 443} (HTTPS)`);
-// });
