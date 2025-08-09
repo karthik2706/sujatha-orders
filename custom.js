@@ -628,7 +628,7 @@ $(document).ready(function () {
   function fetchOrderFunc(ordersData, table, filters) {
     let parseData = ordersData;
 
-    console.log(parseData);
+    // console.log(parseData);
 
     var filteredOrders = parseData.filter(function (order) {
       return order.vendor == filters.vendor && !order.isDispatched;

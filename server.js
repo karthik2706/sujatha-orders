@@ -27,11 +27,20 @@ const app = express();
 // };
 
 //This is backup two
+// const dbConfig = {
+//   host: 'srv1086.hstgr.io',
+//   user: 'u400549820_sujatha_back2',
+//   password: 'Darling@2706',
+//   database: 'u400549820_sujatha_back2',
+//   keepAlive: true,
+// };
+
+//This is new DB
 const dbConfig = {
-  host: 'srv1086.hstgr.io',
-  user: 'u400549820_sujatha_back2',
+  host: 'srv418021.hstgr.cloud',
+  user: 'sujatha_user',
   password: 'Darling@2706',
-  database: 'u400549820_sujatha_back2',
+  database: 'sujatha_db',
   keepAlive: true,
 };
 
@@ -64,7 +73,7 @@ function getDateRange(startDate, endDate) {
 
 // Function to periodically check and reconnect to the database
 function checkDbConnection() {
-  console.log('Checking MySQL database connection...');
+  console.log('Checking MySQL database connection...', dbConfig);
   db = createDbConnection(); // Create a new database connection
 
   db.connect((err) => {
@@ -72,10 +81,10 @@ function checkDbConnection() {
       console.error('Error connecting to MySQL:', err);
       // Handle the connection error here, e.g., retry or take appropriate action
       // Retry connecting after a delay (e.g., 10 seconds)
-      setTimeout(() => {
-        console.log('Retrying database connection...');
-        checkDbConnection(); // Retry the database connection
-      }, 15000); // Retry after 10 seconds
+      // setTimeout(() => {
+      //   console.log('Retrying database connection...');
+      //   checkDbConnection(); // Retry the database connection
+      // }, 15000); // Retry after 10 seconds
     } else {
       console.log('Connected to MySQL database');
     }
@@ -85,20 +94,32 @@ function checkDbConnection() {
   // setTimeout(checkDbConnection, 120000);
 };
 
+// function closeConnection() {
+//   db.connect((err) => {
+//     if (err) {
+//       console.error('No active connection', err);
+//     } else {
+//       db.end((endError) => {
+//         if (endError) {
+//           console.error('Error closing the database connection:', endError);
+//         } else {
+//           console.log('Database connection closed.');
+//         }
+//       });
+//     }
+//   });
+// }
+
 function closeConnection() {
-  db.connect((err) => {
-    if (err) {
-      console.error('No active connection', err);
-    } else {
-      db.end((endError) => {
-        if (endError) {
-          console.error('Error closing the database connection:', endError);
-        } else {
-          console.log('Database connection closed.');
-        }
-      });
-    }
-  });
+  if (db) {
+    db.end((endError) => {
+      if (endError) {
+        console.error('Error closing the database connection:', endError);
+      } else {
+        console.log('Database connection closed.');
+      }
+    });
+  }
 }
 
 // Define a route
@@ -186,6 +207,7 @@ app.use('/getOrder/:orderId', cors());
 
 // Define a route to get an order by ID
 app.get('/getOrder/:orderId', (req, res) => {
+  console.log('getOrders by orderId called');
   // Start the initial database connection check
   checkDbConnection();
   // Extract the orderId from the URL parameters
@@ -213,6 +235,7 @@ app.use('/updateOrder/:orderId', cors());
 
 // Define a route to get an order by ID
 app.get('/updateOrder/:orderId/:tracking', (req, res) => {
+  console.log('update order by OrderId is called');
   checkDbConnection();
   // Extract the orderId from the URL parameters
   const orderId = req.params.orderId;
@@ -268,6 +291,7 @@ app.get('/getProfile', (req, res) => {
 
 app.use('/createOrder', cors());
 app.post('/createOrder', (req, res)=> {
+  console.log('createOrder is called');
   checkDbConnection();
   const ordersData = [];
   var orderid;
@@ -313,13 +337,14 @@ app.post('/createOrder', (req, res)=> {
       }
     });
 
-    // closeConnection();
+    closeConnection();
   });
 });
 
 app.use('/getOrdersByMobile/:mobile', cors());
 // Define a route to fetch orders based on 'mobile'
 app.get('/getOrdersByMobile/:mobile', (req, res) => {
+  console.log('getOrders by mobile is called');
   checkDbConnection();
   const mobileNumber = req.params.mobile; // Get the mobile number from the URL parameter
   console.log(mobileNumber)
@@ -343,6 +368,7 @@ app.get('/getOrdersByMobile/:mobile', (req, res) => {
 app.use('/updateOrderDetails/:id', cors());
 // Define a route to update an order by ID
 app.put('/updateOrderDetails/:id', (req, res) => {
+  console.log('update order details by id is called');
   checkDbConnection();
   const orderId = req.params.id; // Get the order ID from the URL parameter
 
@@ -446,6 +472,7 @@ app.use('/deleteOrders', cors());
 
 // Create an API endpoint to delete multiple entries by IDs
 app.post('/deleteOrders', (req, res) => {
+  console.log('delete orders called');
   checkDbConnection();
   const idsToDelete = req.body; // An array of order IDs to delete
   console.log(idsToDelete);
@@ -463,7 +490,7 @@ app.post('/deleteOrders', (req, res) => {
       res.status(500).json({ error: 'Database error' });
     } else {
       res.json({ message: `${result.affectedRows} orders deleted successfully` });
-      // closeConnection();
+      closeConnection();
     }
   });
 
