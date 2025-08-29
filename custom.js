@@ -118,34 +118,34 @@ function orderSumitted(data, resp) {
   var orderData = data.fields;
 
   //Create Delhivery WayBill Number
-  if (orderData.vendor === "2") {
-    delhiveryApis(
-      "GET",
-      "/waybill/api/fetch/json/",
-      {
-        token: clientKeyD,
-        client_name: clientName,
-      },
-      trackingDCallback,
-      resp
-    );
-  } else if (orderData.vendor === "5") {
-    delhiveryApis(
-      "GET",
-      "/waybill/api/fetch/json/",
-      {
-        token: clientKeyDNew,
-        client_name: clientNameNew,
-      },
-      trackingDCallback,
-      resp
-    );
+  if (orderData.vendor === "2" || orderData.vendor === "5") {
+    const config = orderData.vendor === "2" 
+      ? { token: clientKeyD, client_name: clientName }
+      : { token: clientKeyDNew, client_name: clientNameNew };
+    
+    delhiveryApis("GET", "/waybill/api/fetch/json/", config, trackingDCallback, resp).done(function(data) {
+      console.log('Delhivery Response:', data);
+      const whatsAppKey = 'm6aJbfSFEOLTzInK1j0YUXdPRrwC94g7sWhiuMQ32VZtAxqeB5TU0kKRIAsGP21ylHpa9Lt3Wd5EZBXY';
+      const message_id = '4822';
+      const numbers = orderData.rmobile || orderData.mobile;
+      const rnameD = orderData.rname && orderData.rname.length ? orderData.rname + ' (' + orderData.name + ')' : null;
+      const name = rnameD || orderData.name || 'Customer';
+      const variables_values = `${name}|Sujatha Gold Covering Works|${data}|https://www.delhivery.com`; 
+      
+      $.get(`https://www.fast2sms.com/dev/whatsapp?authorization=${whatsAppKey}&message_id=${message_id}&numbers=${numbers}&variables_values=${variables_values}`)
+        .done(function(response) {
+          console.log('WhatsApp API Response:', response);
+        })
+        .fail(function(error) {
+          console.error('WhatsApp API Error:', error);
+        });
+    });
   }
 }
 
 //Call back after fetching delhivery waybill
 function trackingDCallback(data, orderId) {
-  // console.log('trackingDCallback', data, orderId);
+  console.log('trackingDCallback', data, orderId);
   //Update Tracking number for Delhivery Order
   fetch(`${domain}/updateOrder/${orderId}/${data}`)
     .then(response => response.json())
@@ -1240,7 +1240,7 @@ function download_file(content, fileName, mimeType) {
 
 
 function delhiveryApis(method, service, data, callback, target) {
-  $.ajax({
+  return $.ajax({
     type: method,
     url: urlD + service,
     data: data,
