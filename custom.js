@@ -130,15 +130,16 @@ function orderSumitted(data, resp) {
       const numbers = orderData.rmobile || orderData.mobile;
       const rnameD = orderData.rname && orderData.rname.length ? orderData.rname + ' (' + orderData.name + ')' : null;
       const name = rnameD || orderData.name || 'Customer';
-      const variables_values = `${name}|Sujatha Gold Covering Works|${data}|https://www.delhivery.com`; 
+      const companyName = !isWhatsappNotifications ? 'Sujatha Gold Covering Works' : 'Scan2Ship';
+      const variables_values = `${name}|${companyName}|${data}|https://www.delhivery.com`; 
       
       $.get(`https://www.fast2sms.com/dev/whatsapp?authorization=${whatsAppKey}&message_id=${message_id}&numbers=${numbers}&variables_values=${variables_values}`)
-        .done(function(response) {
-          console.log('WhatsApp API Response:', response);
-        })
-        .fail(function(error) {
-          console.error('WhatsApp API Error:', error);
-        });
+      .done(function(response) {
+        console.log('WhatsApp API Response:', response);
+      })
+      .fail(function(error) {
+        console.error('WhatsApp API Error:', error);
+      });
     });
   }
 }
@@ -354,8 +355,22 @@ function authCheck() {
   }
 }
 
+const isWhatsappNotifications = Cookies.get('whatsappNotifications') === 'true';
+console.log('Is Reseller Order:', isWhatsappNotifications);
+
 $(document).ready(function () {
   authCheck();
+
+  $('#whatsappNotifications').change(function() {
+    Cookies.set('whatsappNotifications', $(this).is(':checked'));
+    window.location.reload();
+  });
+
+  if (Cookies.get('whatsappNotifications') === 'true') {
+    $('#whatsappNotifications').prop('checked', true);
+  } else {
+    $('#whatsappNotifications').prop('checked', false);
+  }
 
   var page = window.page;
 
