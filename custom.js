@@ -133,13 +133,13 @@ function orderSumitted(data, resp) {
       const companyName = !isWhatsappNotifications ? 'Sujatha Gold Covering Works' : 'Scan2Ship';
       const variables_values = `${name}|${companyName}|${data}|https://www.delhivery.com`; 
       
-      $.get(`https://www.fast2sms.com/dev/whatsapp?authorization=${whatsAppKey}&message_id=${message_id}&numbers=${numbers}&variables_values=${variables_values}`)
-      .done(function(response) {
-        console.log('WhatsApp API Response:', response);
-      })
-      .fail(function(error) {
-        console.error('WhatsApp API Error:', error);
-      });
+      // $.get(`https://www.fast2sms.com/dev/whatsapp?authorization=${whatsAppKey}&message_id=${message_id}&numbers=${numbers}&variables_values=${variables_values}`)
+      // .done(function(response) {
+      //   console.log('WhatsApp API Response:', response);
+      // })
+      // .fail(function(error) {
+      //   console.error('WhatsApp API Error:', error);
+      // });
     });
   }
 }
